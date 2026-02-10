@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Salary Calculator (Final Logic)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .input-label {
+            @apply block text-sm font-medium text-gray-700 mb-1;
+        }
+        .input-field {
+            @apply block w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5;
+        }
+        .input-field-readonly {
+            @apply block w-full bg-gray-200 border border-gray-300 text-gray-700 text-sm rounded-lg p-2.5 cursor-not-allowed;
+        }
+        .output-field {
+            @apply text-lg font-semibold text-gray-900;
+        }
+        .output-label {
+            @apply text-sm font-medium text-gray-500;
+        }
+        .card {
+            @apply bg-white p-6 rounded-xl shadow-lg;
+        }
+        .final-amount {
+            @apply text-3xl font-bold text-blue-600;
+        }
+        .copy-success {
+            @apply bg-green-100 text-green-700 border border-green-300 p-2 rounded-lg text-sm text-center transition-opacity duration-300 opacity-100;
+        }
+        .copy-hidden {
+            @apply opacity-0 h-0 p-0;
+        }
+        /* Highlight fields that need attention */
+        .error-border {
+            border-color: #dc2626 !important; /* Red 600 */
+            background-color: #fef2f2 !important; /* Red 50 */
+            border-width: 2px !important;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Salary Calculator (Final Version)</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="md:col-span-2 space-y-6">
+                
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Employee & Salary Details</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div class="sm:col-span-1">
+                            <label for="name" class="input-label">Name</label>
+                            <input type="text" id="name" class="input-field" placeholder="Input Name" value="">
+                        </div>
+                        <div>
+                            <label for="daysInMonth" class="input-label">Month Days</label>
+                            <select id="daysInMonth" class="input-field">
+                                <option value="31">31</option>
+                                <option value="30">30</option>
+                                <option value="29">29</option>
+                                <option value="28">28</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="officeLeave" class="input-label">Holidays in Office</label>
+                            <input type="number" id="officeLeave" class="input-field" placeholder="0" value="0">
+                        </div>
+                        
+                        <div>
+                            <label for="workingDays" class="input-label">Working Days</label>
+                            <input type="number" id="workingDays" class="input-field-readonly" value="0" readonly>
+                            <p class="text-xs text-gray-500 mt-1">Month Days - Holidays</p>
+                        </div>
+
+                        <div>
+                            <label for="basicSalary" class="input-label">Basic Salary</label>
+                            <input type="number" id="basicSalary" class="input-field" placeholder="0" value="0">
+                        </div>
+                        <div>
+                            <label for="additionalPayout" class="input-label">Additional Payout</label>
+                            <select id="additionalPayout" class="input-field">
+                                <option value="0" selected>0</option>
+                                <option value="500">500</option>
+                                <option value="1500">1500</option>
+                            </select>
+                        </div>
+
+                        <div class="sm:col-span-3 mt-4">
+                             <h3 class="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Attendance & Leave Calculation</h3>
+                        </div>
+                        <div>
+                            <label for="presentDays" class="input-label">Total Present Days (Calc)</label>
+                            <input type="number" id="presentDays" class="input-field-readonly" value="0.00" readonly>
+                             <p class="text-xs text-gray-500 mt-1">Total Hours / Daily Time</p>
+                        </div>
+                        
+                        <div>
+                            <label for="lateIns" class="input-label">Total Late-ins <span class="text-red-500">*</span></label>
+                            <input type="number" id="lateIns" class="input-field" placeholder="Input Value" value="">
+                             <p class="text-xs text-gray-500 mt-1">Leave deduction auto-calculated.</p>
+                        </div>
+                        
+                         <div>
+                            <label for="shortDurationPenaltyDays" class="input-label">Short Duration (Deduction)</label>
+                            <input type="number" id="shortDurationPenaltyDays" class="input-field-readonly" value="0.00" readonly>
+                            <p class="text-xs text-gray-500 mt-1">Formula: (2*ShortHours - 6)</p>
+                        </div>
+                        
+                        <div>
+                            <label for="continuousLatePenaltyDays" class="input-label">3 Continue Late-in <span class="text-red-500">*</span></label>
+                            <input type="number" id="continuousLatePenaltyDays" class="input-field" placeholder="Input Value" value="">
+                             <p class="text-xs text-gray-500 mt-1">Deducts 0.5 day per instance.</p>
+                        </div>
+                        
+                        <div>
+                            <label for="noInformLeave" class="input-label">No-inform Leave (Instances)</label>
+                            <input type="number" id="noInformLeave" class="input-field" placeholder="0" value="0">
+                            <p class="text-xs text-gray-500 mt-1">Deducts 0.5 day per instance.</p>
+                        </div>
+                         <div>
+                            <label for="allowedLeaveCredit" class="input-label">Allowed Leave (Credit)</label>
+                            <input type="number" id="allowedLeaveCredit" class="input-field-readonly" value="0.00" readonly>
+                             <p class="text-xs text-gray-500 mt-1">Based on Final Present Days.</p>
+                        </div>
+
+                        <div class="sm:col-span-3 mt-4">
+                             <h3 class="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Bonus & Other Adjustments</h3>
+                        </div>
+                        <div>
+                            <label for="bonusScale" class="input-label">Bonus Scale</label>
+                            <select id="bonusScale" class="input-field">
+                                <option value="1">100%</option>
+                                <option value="0.5">50%</option>
+                                <option value="0" selected>0%</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="noLeaveBonus" class="input-label">No Leave Bonus</label>
+                            <input type="text" id="noLeaveBonus" class="input-field-readonly" value="₹0.00" readonly>
+                        </div>
+                         <div>
+                            <label for="noLateInBonus" class="input-label">No Late-in Bonus</label>
+                            <input type="text" id="noLateInBonus" class="input-field-readonly" value="₹0.00" readonly>
+                        </div>
+                         <div>
+                            <label for="anyOther" class="input-label">Any Other (Bonus/Deduction)</label>
+                            <input type="number" id="anyOther" class="input-field" placeholder="0" value="0">
+                        </div>
+                        <div>
+                            <label for="top3" class="input-label">Top 3 Bonus</label>
+                            <input type="number" id="top3" class="input-field" placeholder="0" value="0">
+                        </div>
+                    </div>
+                </div>
+                 <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Daily Present Hours (Full Hours, Rounded Down)</h2>
+                    <div>
+                        <label for="dailyWorkingTime" class="input-label">Daily Working Time (Required Hours)</label>
+                        <select id="dailyWorkingTime" class="input-field mb-4">
+                            <option value="9">9 Hours</option>
+                            <option value="6">6 Hours</option>
+                            <option value="4.5">4.5 Hours</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                            <span class="output-label font-bold text-gray-800">Total Hours Worked</span>
+                            <span id="totalPresentHours" class="output-field">0</span>
+                    </div>
+                    <div id="dailyHoursContainer" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-2 pr-2">
+                        </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-1 space-y-6">
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Calculation Summary</h2>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="output-label">Total Salary (Basic + Add.)</span>
+                            <span id="totalSalary" class="output-field">₹0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="output-label font-bold text-blue-800">Total Present Days</span> 
+                            <span id="officeDays" class="output-field">0.00</span>
+                        </div>
+                        <hr/>
+                        <div class="flex justify-between items-center">
+                            <span class="output-label text-red-600">Short Duration (Days)</span>
+                            <span id="summaryShortDuration" class="output-field text-red-600">-0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="output-label text-red-600">Late-in Leave (Days)</span>
+                            <span id="summaryLateIn" class="output-field text-red-600">-0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="output-label text-red-600">3 Continue Late-in (Days)</span>
+                            <span id="summaryContinuousLate" class="output-field text-red-600">-0.00</span>
+                        </div>
+                         <div class="flex justify-between items-center">
+                            <span class="output-label text-red-600">No-inform Leave (Days)</span>
+                            <span id="summaryNoInform" class="output-field text-red-600">-0.00</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center bg-gray-100 p-2 rounded">
+                            <span class="output-label font-bold text-gray-800">Final Present Days</span>
+                            <span id="finalPresentDays" class="output-field font-bold text-gray-800">0.00</span>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="output-label text-green-600">Allowed Leave (Credit)</span>
+                            <span id="summaryAllowedLeave" class="output-field text-green-600">+0.00</span>
+                        </div>
+                        <hr/>
+                        <div class="flex justify-between items-center">
+                            <span class="output-label font-bold">Payable Days</span>
+                            <span id="payableDays" class="output-field font-bold text-blue-600">0.00</span>
+                        </div>
+                        <hr/>
+                         <div class="flex justify-between items-center">
+                            <span class="output-label">Salary Payable</span>
+                            <span id="salaryPayable" class="output-field">₹0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="output-label text-green-600">No Leave Bonus</span>
+                            <span id="summaryNoLeaveBonus" class="output-field text-green-600">+ ₹0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="output-label text-green-600">No Late-in Bonus</span>
+                            <span id="summaryNoLateInBonus" class="output-field text-green-600">+ ₹0.00</span>
+                        </div>
+                        <hr/>
+                        <div class="text-center mt-4 bg-blue-50 p-4 rounded-lg">
+                            <span class="output-label">Final Amount Payable</span>
+                            <p id="finalAmountPayable" class="final-amount">₹0.00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card bg-blue-50 border-2 border-blue-200 mt-6">
+            <h2 class="text-xl font-semibold text-blue-800 border-b border-blue-200 pb-2 mb-4">Share Calculation</h2>
+            
+            <div id="linkErrorMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 text-center font-bold">
+                Aapki Late-Ins aur 3-Continue Late-Ins ki Details Add kijiye
+            </div>
+
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 items-stretch">
+                <input type="text" id="shareLinkOutput" class="input-field bg-white flex-grow cursor-text" readonly placeholder="Click 'Generate Link' to create a shareable URL">
+                <button id="generateLinkButton" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out whitespace-nowrap">
+                    Generate Link
+                </button>
+            </div>
+            <div id="copySuccessMessage" class="copy-hidden mt-3">Link copied successfully!</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- DOM Element References ---
+            const inputs = {
+                name: document.getElementById('name'),
+                basicSalary: document.getElementById('basicSalary'),
+                additionalPayout: document.getElementById('additionalPayout'),
+                daysInMonth: document.getElementById('daysInMonth'),
+                officeLeave: document.getElementById('officeLeave'), // Now "Holidays in Office"
+                workingDays: document.getElementById('workingDays'), // New Input
+                presentDays: document.getElementById('presentDays'),
+                shortDurationPenaltyDays: document.getElementById('shortDurationPenaltyDays'),
+                lateIns: document.getElementById('lateIns'),
+                continuousLatePenaltyDays: document.getElementById('continuousLatePenaltyDays'),
+                noInformLeave: document.getElementById('noInformLeave'),
+                allowedLeaveCredit: document.getElementById('allowedLeaveCredit'),
+                bonusScale: document.getElementById('bonusScale'),
+                noLeaveBonus: document.getElementById('noLeaveBonus'),
+                noLateInBonus: document.getElementById('noLateInBonus'),
+                anyOther: document.getElementById('anyOther'),
+                top3: document.getElementById('top3'),
+                dailyWorkingTime: document.getElementById('dailyWorkingTime'),
+            };
+
+            const outputs = {
+                totalSalary: document.getElementById('totalSalary'),
+                officeDays: document.getElementById('officeDays'), // This is Total Present Days
+                finalPresentDays: document.getElementById('finalPresentDays'), // New Output
+                payableDays: document.getElementById('payableDays'),
+                salaryPayable: document.getElementById('salaryPayable'),
+                finalAmountPayable: document.getElementById('finalAmountPayable'),
+                totalPresentHours: document.getElementById('totalPresentHours'),
+                summaryShortDuration: document.getElementById('summaryShortDuration'),
+                summaryLateIn: document.getElementById('summaryLateIn'),
+                summaryContinuousLate: document.getElementById('summaryContinuousLate'),
+                summaryNoInform: document.getElementById('summaryNoInform'),
+                summaryAllowedLeave: document.getElementById('summaryAllowedLeave'),
+                summaryNoLeaveBonus: document.getElementById('summaryNoLeaveBonus'),
+                summaryNoLateInBonus: document.getElementById('summaryNoLateInBonus'),
+            };
+            
+            const dailyHoursContainer = document.getElementById('dailyHoursContainer');
+            const shareLinkOutput = document.getElementById('shareLinkOutput');
+            const generateLinkButton = document.getElementById('generateLinkButton');
+            const copySuccessMessage = document.getElementById('copySuccessMessage');
+            const linkErrorMessage = document.getElementById('linkErrorMessage');
+
+
+            // --- Helper Functions ---
+            const formatCurrency = (value) => `₹${(value || 0).toFixed(2)}`;
+            const getNumberValue = (element) => {
+                const val = parseFloat(element.value);
+                return isNaN(val) ? 0 : val;
+            };
+            // Distinct from getNumberValue, this checks if the string is empty
+            const isInputEmpty = (element) => element.value.trim() === "";
+            
+            const getNumericInputElements = () => dailyHoursContainer.querySelectorAll('input');
+
+            // --- Validation Logic ---
+            function validateRequiredFields() {
+                let isValid = true;
+                const requiredFields = [inputs.lateIns, inputs.continuousLatePenaltyDays];
+                let missingFields = false;
+                
+                requiredFields.forEach(field => {
+                    if (isInputEmpty(field)) {
+                        field.classList.add('error-border');
+                        missingFields = true;
+                        isValid = false;
+                    } else {
+                        field.classList.remove('error-border');
+                    }
+                });
+
+                if (missingFields) {
+                    linkErrorMessage.classList.remove('hidden');
+                } else {
+                    linkErrorMessage.classList.add('hidden');
+                }
+
+                return isValid;
+            }
+
+            // Attach validation on input to clear errors immediately
+            [inputs.lateIns, inputs.continuousLatePenaltyDays].forEach(field => {
+                field.addEventListener('input', function() {
+                    // If user adds value, remove red border
+                    if (!isInputEmpty(this)) {
+                        this.classList.remove('error-border');
+                    }
+                    
+                    // If both are now valid, hide the error message
+                    if (!isInputEmpty(inputs.lateIns) && !isInputEmpty(inputs.continuousLatePenaltyDays)) {
+                        linkErrorMessage.classList.add('hidden');
+                    }
+                    
+                    calculateSalary();
+                });
+            });
+
+            // --- Query String Mappings ---
+            const queryMap = {
+                'n': 'name', 'bs': 'basicSalary', 'ap': 'additionalPayout', 'dim': 'daysInMonth',
+                'ol': 'officeLeave', 'li': 'lateIns', 'cl': 'continuousLatePenaltyDays', 
+                'nil': 'noInformLeave', 'bsl': 'bonusScale', 'ao': 'anyOther', 
+                't3': 'top3', 'dwt': 'dailyWorkingTime'
+            };
+
+            const reverseQueryMap = Object.entries(queryMap).reduce((acc, [key, value]) => {
+                acc[value] = key;
+                return acc;
+            }, {});
+
+            // --- Serialization (Generate Link) ---
+            function generateShareLink() {
+                // Pre-validation before generating link
+                if (!validateRequiredFields()) return;
+
+                const params = new URLSearchParams();
+                
+                Object.keys(inputs).forEach(key => {
+                    const element = inputs[key];
+                    if (element && reverseQueryMap[key]) {
+                        const value = key === 'name' ? element.value : getNumberValue(element);
+                        if (value !== 0 || key === 'name' && value !== '') {
+                             params.set(reverseQueryMap[key], value);
+                        }
+                    }
+                });
+
+                const dailyHours = Array.from(getNumericInputElements()).map(input => getNumberValue(input));
+                let dhString = dailyHours.join(',');
+                dhString = dhString.replace(/,0+$/, '');
+                
+                if (dhString) {
+                    params.set('dh', dhString);
+                }
+
+                const baseUrl = window.location.origin + window.location.pathname;
+                const shareLink = baseUrl + '?' + params.toString();
+                
+                shareLinkOutput.value = shareLink;
+                copyToClipboard(shareLink);
+            }
+
+            // --- Deserialization ---
+            function loadFromQueryString() {
+                const urlParams = new URLSearchParams(window.location.search);
+                let dataLoaded = false;
+
+                Object.entries(queryMap).forEach(([queryKey, inputId]) => {
+                    if (urlParams.has(queryKey)) {
+                        const element = inputs[inputId];
+                        if (element) {
+                            element.value = urlParams.get(queryKey);
+                            dataLoaded = true;
+                        }
+                    }
+                });
+
+                if (urlParams.has('dh')) {
+                    const dhString = urlParams.get('dh');
+                    const dhArray = dhString.split(',').map(h => parseFloat(h) || 0);
+                    const dailyInputs = getNumericInputElements();
+                    dhArray.forEach((hour, index) => {
+                        if (dailyInputs[index]) {
+                            dailyInputs[index].value = Math.floor(hour);
+                        }
+                    });
+                    dataLoaded = true;
+                }
+                return dataLoaded;
+            }
+
+            function copyToClipboard(text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => showCopySuccess()).catch(err => fallbackCopy(text));
+                } else {
+                    fallbackCopy(text);
+                }
+            }
+
+            function fallbackCopy(text) {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed"; 
+                textArea.style.opacity = "0"; 
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showCopySuccess();
+                } catch (err) {
+                    console.error('Fallback copy failed', err);
+                }
+                document.body.removeChild(textArea);
+            }
+
+            function showCopySuccess() {
+                copySuccessMessage.classList.remove('copy-hidden');
+                copySuccessMessage.classList.add('copy-success');
+                setTimeout(() => {
+                    copySuccessMessage.classList.add('copy-hidden');
+                    copySuccessMessage.classList.remove('copy-success');
+                }, 2000);
+            }
+
+            // --- Core Calculation Logic ---
+            function calculateSalary() {
+                // 1. Get Inputs
+                const basicSalary = getNumberValue(inputs.basicSalary);
+                const additionalPayout = getNumberValue(inputs.additionalPayout);
+                const daysInMonth = getNumberValue(inputs.daysInMonth);
+                const holidaysInOffice = getNumberValue(inputs.officeLeave); // Renamed variable
+                
+                const lateIns = getNumberValue(inputs.lateIns);
+                const continuousLateInstances = getNumberValue(inputs.continuousLatePenaltyDays);
+                const noInformLeaveInstances = getNumberValue(inputs.noInformLeave);
+                
+                const bonusScale = getNumberValue(inputs.bonusScale);
+                const anyOther = getNumberValue(inputs.anyOther);
+                const top3 = getNumberValue(inputs.top3);
+                const dailyWorkingTimeHours = getNumberValue(inputs.dailyWorkingTime); // 9, 6, 4.5
+
+                // 2. Calculated "Working Days" = Month Days - Holidays
+                const workingDays = daysInMonth - holidaysInOffice;
+                inputs.workingDays.value = workingDays;
+
+                // 3. Daily Attendance Metrics (New Logic)
+                const { totalHours, totalShortDurationHours } = calculateDailyAttendanceMetrics(dailyWorkingTimeHours);
+
+                // --- Calculate "Short Durations" Logic ---
+                // Formula: (2 * Time in Short Duration) - 6 Hours
+                // Constraint: Use Calculate Zero if result < 0
+                let shortDurationPenaltyHours = (2 * totalShortDurationHours) - 6;
+                if (shortDurationPenaltyHours < 0) shortDurationPenaltyHours = 0;
+                
+                // Convert Penalty Hours to Days for deduction summary
+                const shortDurationDeductionDays = dailyWorkingTimeHours > 0 ? (shortDurationPenaltyHours / dailyWorkingTimeHours) : 0;
+
+                // --- Total Present Days ---
+                // Formula: No of Hours Worked / Daily Working time
+                const totalPresentDays = dailyWorkingTimeHours > 0 ? (totalHours / dailyWorkingTimeHours) : 0;
+
+                // Update basic outputs
+                inputs.presentDays.value = totalPresentDays.toFixed(2);
+                inputs.shortDurationPenaltyDays.value = shortDurationDeductionDays.toFixed(2);
+                outputs.totalPresentHours.textContent = totalHours.toFixed(0);
+
+                // --- Penalties ---
+                // Late-in Deduction
+                let lateInLeaveDeductionDays = 0;
+                if (lateIns > 15) lateInLeaveDeductionDays = Math.ceil(lateIns / 5);
+                else if (lateIns >= 9) lateInLeaveDeductionDays = 1;
+                else if (lateIns >= 5) lateInLeaveDeductionDays = 0.5;
+
+                const continuousLatePenalty = continuousLateInstances * 0.5;
+                const noInformLeavePenalty = noInformLeaveInstances * 0.5;
+
+                // --- Final Present Days ---
+                // Formula: Office Days (TotalPresentDays) less {Short Duration + Late-in + 3 Continue + No-inform}
+                const totalDeductions = shortDurationDeductionDays + lateInLeaveDeductionDays + continuousLatePenalty + noInformLeavePenalty;
+                
+                let finalPresentDays = totalPresentDays - totalDeductions;
+                if (finalPresentDays < 0) finalPresentDays = 0;
+
+                outputs.finalPresentDays.textContent = finalPresentDays.toFixed(2);
+                outputs.officeDays.textContent = totalPresentDays.toFixed(2); // Labelled as Total Present Days
+
+                // --- Allowed Leave Credit ---
+                // Logic based on Final Present Days
+                let allowedLeaveCredit = 0;
+                if (finalPresentDays >= 25.00) allowedLeaveCredit = 3;
+                else if (finalPresentDays >= 20.00) allowedLeaveCredit = 2;
+                else if (finalPresentDays >= 14.00) allowedLeaveCredit = 1;
+                else allowedLeaveCredit = 0;
+
+                inputs.allowedLeaveCredit.value = allowedLeaveCredit.toFixed(2);
+
+                // --- Payable Days (Conditional Max) ---
+                let payableDays = 0;
+                
+                // If "final Present Days" is more than {working}, Payable Days = Final Present Days + Allowed Leave Credit
+                if (finalPresentDays > workingDays) {
+                    payableDays = finalPresentDays + allowedLeaveCredit;
+                } else {
+                    // else Payable Days = Minimum of {final Present Days + Allowed Leave} or working Days
+                    payableDays = Math.min(finalPresentDays + allowedLeaveCredit, workingDays);
+                }
+                
+                // Note: Removed the safety cap of "daysInMonth" here per the logic request 
+                // allowing Payable Days to exceed Month Days if the formula results in it.
+
+                // --- Salary Calculation ---
+                const totalSalary = basicSalary + additionalPayout;
+                const perDaySalary = daysInMonth > 0 ? totalSalary / daysInMonth : 0;
+                const salaryPayable = perDaySalary * payableDays;
+
+                // --- Bonuses ---
+                
+                // No Leave Bonus: {working days - final Present Days} is 1 or less than 1 days
+                const differenceForBonus = workingDays - finalPresentDays;
+                const isNoLeaveBonusPayable = differenceForBonus <= 1;
+
+                const noLeaveBonusValue = isNoLeaveBonusPayable ? 500 * bonusScale : 0;
+                
+                const noLateInBonusValue = (lateIns <= 3) ? 400 * bonusScale : 0;
+
+                // Update Bonus Inputs/Outputs
+                inputs.noLeaveBonus.value = formatCurrency(noLeaveBonusValue);
+                inputs.noLateInBonus.value = formatCurrency(noLateInBonusValue);
+
+                const finalAmountPayable = salaryPayable + noLeaveBonusValue + noLateInBonusValue + anyOther + top3;
+
+                // --- UI Updates ---
+                outputs.totalSalary.textContent = formatCurrency(totalSalary);
+                outputs.summaryShortDuration.textContent = `-${shortDurationDeductionDays.toFixed(2)}`;
+                outputs.summaryLateIn.textContent = `-${lateInLeaveDeductionDays.toFixed(2)}`;
+                outputs.summaryContinuousLate.textContent = `-${continuousLatePenalty.toFixed(2)}`;
+                outputs.summaryNoInform.textContent = `-${noInformLeavePenalty.toFixed(2)}`;
+                
+                const summaryAllowedLeaveText = allowedLeaveCredit > 0 ? `+${allowedLeaveCredit.toFixed(2)}` : "+0.00";
+                outputs.summaryAllowedLeave.textContent = summaryAllowedLeaveText;
+                
+                outputs.payableDays.textContent = payableDays.toFixed(2);
+                outputs.salaryPayable.textContent = formatCurrency(salaryPayable);
+
+                outputs.summaryNoLeaveBonus.textContent = `+ ${formatCurrency(noLeaveBonusValue)}`;
+                outputs.summaryNoLateInBonus.textContent = `+ ${formatCurrency(noLateInBonusValue)}`;
+
+                outputs.finalAmountPayable.textContent = formatCurrency(finalAmountPayable);
+            }
+            
+            function calculateDailyAttendanceMetrics(dailyWorkingTimeHours) {
+                const hourInputs = getNumericInputElements();
+                let totalHours = 0;
+                let totalShortDurationHours = 0;
+
+                hourInputs.forEach(input => {
+                    const hoursWorked = getNumberValue(input);
+                    
+                    if (hoursWorked > 0) {
+                        totalHours += hoursWorked;
+
+                        // Count and Total where days worked is less then daily working time
+                        if (hoursWorked < dailyWorkingTimeHours) {
+                            totalShortDurationHours += hoursWorked;
+                        }
+                    }
+                });
+
+                return { totalHours, totalShortDurationHours };
+            }
+
+            // --- Dynamic Day Inputs ---
+            function generateDayInputs() {
+                dailyHoursContainer.innerHTML = '';
+                const daysInMonth = 31;
+                
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const dayWrapper = document.createElement('div');
+                    dayWrapper.className = 'flex items-center space-x-2';
+                    
+                    const label = document.createElement('label');
+                    label.className = 'text-sm text-gray-600 w-10';
+                    label.textContent = `Day ${i}`;
+                    
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '0';
+                    input.step = '1';
+                    input.className = 'input-field w-20 text-center p-1';
+                    input.placeholder = 'Hours';
+                    input.value = '0';
+                    input.addEventListener('input', (e) => {
+                        e.target.value = Math.floor(getNumberValue(e.target)); 
+                        calculateSalary();
+                    });
+                    
+                    dayWrapper.appendChild(label);
+                    dayWrapper.appendChild(input);
+                    dailyHoursContainer.appendChild(dayWrapper);
+                }
+            }
+            
+            // --- Event Listeners ---
+            Object.values(inputs).forEach(input => {
+                if (!input.readOnly) {
+                    input.addEventListener('input', calculateSalary);
+                    input.addEventListener('change', calculateSalary);
+                }
+            });
+
+            generateLinkButton.addEventListener('click', generateShareLink);
+            
+            // --- Init ---
+            generateDayInputs();
+            const dataLoaded = loadFromQueryString();
+            
+            calculateSalary(); 
+
+            if (dataLoaded) {
+                shareLinkOutput.value = window.location.href;
+                copyToClipboard(window.location.href);
+            }
+        });
+    </script>
+</body>
+</html>
