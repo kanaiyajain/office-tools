@@ -115,7 +115,7 @@
                          <div>
                             <label for="shortDurationPenaltyDays" class="input-label">Short Duration (Deduction)</label>
                             <input type="number" id="shortDurationPenaltyDays" class="input-field-readonly" value="0.00" readonly>
-                            <p class="text-xs text-gray-500 mt-1">Formula: (2*ShortHours - 6)/DailyTime</p>
+                            <p class="text-xs text-gray-500 mt-1">Sum of shortage hours (Basic Sum)</p>
                         </div>
                         
                         <div>
@@ -482,7 +482,7 @@
                 const basicSalary = getNumberValue(inputs.basicSalary);
                 const additionalPayout = getNumberValue(inputs.additionalPayout);
                 const daysInMonth = getNumberValue(inputs.daysInMonth);
-                const holidaysInOffice = getNumberValue(inputs.officeLeave); // Renamed variable
+                const holidaysInOffice = getNumberValue(inputs.officeLeave); 
                 
                 const lateIns = getNumberValue(inputs.lateIns);
                 const continuousLateInstances = getNumberValue(inputs.continuousLatePenaltyDays);
@@ -497,18 +497,27 @@
                 const workingDays = daysInMonth - holidaysInOffice;
                 inputs.workingDays.value = workingDays;
 
-                // 3. Daily Attendance Metrics (New Logic)
-                const { totalHours, totalShortDurationHours } = calculateDailyAttendanceMetrics(dailyWorkingTimeHours);
+                // 3. Daily Attendance Metrics
+                // sumShortageHours = Sum of shortage hours from daily working hours 
+                // for only those days where worked < daily working hours
+                const { totalHours, sumShortageHours } = calculateDailyAttendanceMetrics(dailyWorkingTimeHours);
 
                 // --- Calculate "Short Durations" Logic ---
-                // Formula: (2 * Time in Short Duration) - 6 Hours
-                // Constraint: Use Calculate Zero if result < 0
-                let shortDurationPenaltyHours = (2 * totalShortDurationHours) - 6;
-                if (shortDurationPenaltyHours < 0) shortDurationPenaltyHours = 0;
                 
-                // Convert Penalty Hours to Days for deduction summary
+                // 1. Visible Field "Short Duration (Deduction)" = Sum of shortage hours (Basic Sum)
+                // We display this raw value in the input field.
+                inputs.shortDurationPenaltyDays.value = sumShortageHours.toFixed(2);
+
+                // 2. Hidden Calculation: Total Short Durations in Hours
+                // Formula: 2 * (Sum - 6). Use value as Zero if value is negative.
+                let totalHiddenShortDurationHours = 2 * (sumShortageHours - 6);
+                if (totalHiddenShortDurationHours < 0) {
+                    totalHiddenShortDurationHours = 0;
+                }
+
+                // 3. Calculate Final Deduction in Days
                 // Formula: Total Short Durations in Hours / Daily Working Time
-                const shortDurationDeductionDays = dailyWorkingTimeHours > 0 ? (shortDurationPenaltyHours / dailyWorkingTimeHours) : 0;
+                const shortDurationDeductionDays = dailyWorkingTimeHours > 0 ? (totalHiddenShortDurationHours / dailyWorkingTimeHours) : 0;
 
                 // --- Total Present Days ---
                 // Formula: No of Hours Worked / Daily Working time
@@ -516,7 +525,6 @@
 
                 // Update basic outputs
                 inputs.presentDays.value = totalPresentDays.toFixed(2);
-                inputs.shortDurationPenaltyDays.value = shortDurationDeductionDays.toFixed(2);
                 outputs.totalPresentHours.textContent = totalHours.toFixed(0);
 
                 // --- Penalties ---
@@ -605,7 +613,7 @@
             function calculateDailyAttendanceMetrics(dailyWorkingTimeHours) {
                 const hourInputs = getNumericInputElements();
                 let totalHours = 0;
-                let totalShortDurationHours = 0;
+                let sumShortageHours = 0; 
 
                 hourInputs.forEach(input => {
                     const hoursWorked = getNumberValue(input);
@@ -615,12 +623,13 @@
 
                         // Count and Total where days worked is less then daily working time
                         if (hoursWorked < dailyWorkingTimeHours) {
-                            totalShortDurationHours += hoursWorked;
+                            const shortage = dailyWorkingTimeHours - hoursWorked;
+                            sumShortageHours += shortage;
                         }
                     }
                 });
 
-                return { totalHours, totalShortDurationHours };
+                return { totalHours, sumShortageHours };
             }
 
             // --- Dynamic Day Inputs ---
