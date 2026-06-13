@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blank Invoice Generator – Redcoupons</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* --- PRINT STYLES (A4 Portrait) --- */
+        @media print {
+            @page {
+                size: A4 portrait;
+                /* A4 height is 297mm. Top margin 15mm + Bottom margin 30mm = 45mm. 
+                   Leaves exactly ~252mm (85% of 297mm) for the content area. */
+                margin: 15mm 15mm 30mm 15mm; 
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+            .no-print {
+                display: none !important;
+            }
+            #invoiceArea {
+                display: flex !important;
+                flex-direction: column;
+                height: 252mm; /* Forces the layout to use exactly 85% of A4 height */
+            }
+        }
+
+        /* --- GENERAL STYLES --- */
+        body {
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            color: #222;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,.1);
+            border-radius: 6px;
+        }
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin: 8px 0 4px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+        .row > div {
+            flex: 1;
+        }
+        button {
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 15px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #1557b0;
+        }
+
+        /* --- INVOICE LAYOUT STYLES --- */
+        #invoiceArea {
+            display: none; /* Hidden on screen until print */
+            background: #fff;
+            padding: 0 10mm;
+            max-width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        
+        /* Header */
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #222;
+            padding-bottom: 15px;
+        }
+        .invoice-title {
+            font-size: 2.5em;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #222;
+            margin: 0;
+        }
+        
+        /* Details Section */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .info-block h4 {
+            margin: 0 0 5px 0;
+            color: #666;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+        .dotted-line {
+            display: inline-block;
+            border-bottom: 1px dashed #777;
+            width: 140px;
+            margin-left: 5px;
+        }
+        
+        /* Date formatting specifics */
+        .date-part {
+            display: inline-block;
+            border-bottom: 1px dashed #777;
+            width: 30px;
+            margin: 0 3px;
+        }
+        .date-part-short {
+            display: inline-block;
+            border-bottom: 1px dashed #777;
+            width: 25px;
+            margin-left: 1px;
+        }
+
+        /* Information Lines Spacing */
+        .info-line {
+            margin-bottom: 3px;
+        }
+
+        /* Modern Description Box */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .items-table th {
+            background-color: #f8f9fa;
+            color: #333;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            padding: 12px;
+            border-top: 2px solid #222;
+            border-bottom: 2px solid #222;
+            text-align: left;
+            -webkit-print-color-adjust: exact;
+        }
+        .items-table th.center { text-align: center; }
+        .items-table th.right { text-align: right; }
+        
+        .items-table td {
+            padding: 18px 12px; /* Spacious for handwriting */
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
+        }
+        .items-table .center { text-align: center; }
+        .items-table .right { text-align: right; }
+
+        /* Footer Totals Section */
+        .items-table tfoot th, .items-table tfoot td {
+            border-bottom: none;
+            padding: 10px 12px;
+        }
+        .total-row th, .total-row td {
+            border-top: 2px solid #222 !important;
+            font-size: 15px;
+            padding-top: 20px;
+        }
+
+        /* Footer / Bottom Section */
+        .invoice-footer {
+            margin-top: auto; /* Pushes footer to the bottom of the 85% height */
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-top: 20px;
+        }
+        .payment-info {
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .payment-info h4 {
+            margin: 0 0 5px 0;
+            color: #666;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+        .signature-box {
+            text-align: center;
+        }
+        .signature-line {
+            display: inline-block;
+            margin-top: 60px;
+            border-top: 1px solid #222;
+            width: 200px;
+            padding-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container no-print">
+    <h2>Modern Blank Invoice Generator</h2>
+    <p style="text-align: center; color: #555; margin-bottom: 25px;">Enter the fixed details below. The printed format will feature modern blank rows for handwritten entries.</p>
+
+    <div class="row">
+        <div>
+            <label>Invoice Issuer Name</label>
+            <input type="text" id="issuerName" placeholder="e.g. John Doe">
+        </div>
+        <div>
+            <label>PAN Card Number</label>
+            <input type="text" id="pan" placeholder="e.g. ABCDE1234F">
+        </div>
+    </div>
+
+    <div class="row">
+        <div>
+            <label>Phone Number (Optional)</label>
+            <input type="text" id="issuerPhone" placeholder="e.g. +91 9876543210">
+        </div>
+        <div>
+            <label>Email Address (Optional)</label>
+            <input type="email" id="issuerEmail" placeholder="e.g. name@example.com">
+        </div>
+    </div>
+
+    <div>
+        <label>Invoice Issuer Address</label>
+        <textarea id="issuerAddress" rows="2" placeholder="Enter full address..."></textarea>
+    </div>
+
+    <div class="row">
+        <div>
+            <label>Bank Name</label>
+            <input type="text" id="bankName" placeholder="e.g. State Bank of India">
+        </div>
+        <div>
+            <label>Account Number</label>
+            <input type="text" id="accNo" placeholder="Account Number">
+        </div>
+        <div>
+            <label>IFSC Code</label>
+            <input type="text" id="ifsc" placeholder="IFSC Code">
+        </div>
+    </div>
+
+    <button type="button" onclick="printInvoice()">Print Modern Blank Invoice</button>
+</div>
+
+<div id="invoiceArea">
+    
+    <div class="invoice-header">
+        <h1 class="invoice-title">Invoice</h1>
+        <div style="text-align: right; font-size: 14px;">
+            <div style="margin-bottom: 12px;">
+                <strong>Invoice No:</strong> <span class="dotted-line"></span>
+            </div>
+            <div>
+                <strong>Date:</strong> 
+                <span class="date-part"></span> / 
+                <span class="date-part"></span> / 
+                20<span class="date-part-short"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-block">
+            <h4>Billed From</h4>
+            <div class="info-line"><strong id="printIssuerName" style="font-size: 16px;"></strong></div>
+            <div class="info-line" id="printIssuerAddress"></div>
+            
+            <div class="info-line" id="phoneWrapper"><strong>Phone:</strong> <span id="printPhone"></span></div>
+            <div class="info-line" id="emailWrapper"><strong>Email:</strong> <span id="printEmail"></span></div>
+            
+            <div class="info-line"><strong>PAN:</strong> <span id="printPan"></span></div>
+        </div>
+        <div class="info-block" style="text-align: right;">
+            <h4>Billed To</h4>
+            <div class="info-line"><strong style="font-size: 16px;">Redcoupons Private Limited</strong></div>
+            <div class="info-line">Ward No. 29, Pani Tanki Ke Pass, Nokha,</div>
+            <div class="info-line">Bikaner, Nokha, Rajasthan, India, 334803</div>
+            <div class="info-line"><strong>CIN:</strong> U73100RJ2024PTC098563</div>
+        </div>
+    </div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th class="center" style="width: 80px;">Qty</th>
+                <th class="right" style="width: 120px;">Price (₹)</th>
+                <th class="right" style="width: 140px;">Amount (₹)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Data Entry & Content Writing</strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="2" style="vertical-align: top; border-right: none;">
+                    <strong>Amount in Words:</strong> <br>
+                    <span style="display:inline-block; border-bottom: 1px dashed #777; width: 95%; height: 25px; margin-top: 5px;"></span><br>
+                    <span style="display:inline-block; border-bottom: 1px dashed #777; width: 95%; height: 25px;"></span>
+                </td>
+                <th class="right" style="vertical-align: top;">Total Amount (₹)</th>
+                <td class="right" style="vertical-align: top;"><span style="display:inline-block; border-bottom: 1px dashed #777; width: 100px;"></span></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="invoice-footer">
+        <div class="payment-info">
+            <h4>Payment Information</h4>
+            <div class="info-line"><strong>Bank Name:</strong> <span id="printBank"></span></div>
+            <div class="info-line"><strong>Account No:</strong> <span id="printAcc"></span></div>
+            <div class="info-line"><strong>IFSC Code:</strong> <span id="printIfsc"></span></div>
+        </div>
+        
+        <div class="signature-box">
+            <span style="font-size: 13px;">For <strong><span id="printIssuerNameSign"></span></strong></span><br>
+            <span class="signature-line">Authorized Signatory</span>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function printInvoice() {
+        // Map required fields. Fallback to underscores if left blank.
+        document.getElementById('printIssuerName').textContent = document.getElementById('issuerName').value || '_______________________';
+        document.getElementById('printIssuerAddress').innerText = document.getElementById('issuerAddress').value || '_______________________\n_______________________';
+        document.getElementById('printPan').textContent = document.getElementById('pan').value || '_________________';
+        
+        // Handle optional Phone logic (Omit whole line if empty)
+        const phoneVal = document.getElementById('issuerPhone').value.trim();
+        const phoneWrapper = document.getElementById('phoneWrapper');
+        if (phoneVal) {
+            document.getElementById('printPhone').textContent = phoneVal;
+            phoneWrapper.style.display = 'block';
+        } else {
+            phoneWrapper.style.display = 'none';
+        }
+
+        // Handle optional Email logic (Omit whole line if empty)
+        const emailVal = document.getElementById('issuerEmail').value.trim();
+        const emailWrapper = document.getElementById('emailWrapper');
+        if (emailVal) {
+            document.getElementById('printEmail').textContent = emailVal;
+            emailWrapper.style.display = 'block';
+        } else {
+            emailWrapper.style.display = 'none';
+        }
+
+        // Map Payment fields
+        document.getElementById('printBank').textContent = document.getElementById('bankName').value || '_______________________';
+        document.getElementById('printAcc').textContent = document.getElementById('accNo').value || '_______________________';
+        document.getElementById('printIfsc').textContent = document.getElementById('ifsc').value || '_________________';
+        
+        // Map Signature field
+        document.getElementById('printIssuerNameSign').textContent = document.getElementById('issuerName').value || 'Issuer';
+
+        // Trigger browser print dialog
+        window.print();
+    }
+</script>
+
+</body>
+</html>
