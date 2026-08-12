@@ -197,6 +197,7 @@
             margin-top: 8px;
             font-size: 12px;
             color: #4b5563;
+            line-height: 1.6;
         }
 
         .slip-title {
@@ -239,7 +240,7 @@
         }
 
         .net-pay-highlight {
-            width: 35%; /* Increased width to accommodate larger numbers */
+            width: 35%;
             background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
             border: 1px solid #a7f3d0;
             padding: 20px 15px;
@@ -252,7 +253,7 @@
         }
 
         .net-pay-highlight .amount {
-            font-size: 28px; /* Adjusted down slightly so 10,00,000.00 fits perfectly */
+            font-size: 28px;
             font-weight: 700;
             color: #047857;
             margin-bottom: 5px;
@@ -275,7 +276,7 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             overflow: hidden;
-            table-layout: fixed; /* Ensures rigid column widths */
+            table-layout: fixed;
         }
 
         .salary-table th {
@@ -290,7 +291,6 @@
             border-bottom: 2px solid var(--border-color);
         }
         
-        /* Adjusted widths to give amounts more space so decimals don't overlap borders */
         .salary-table th:nth-child(1), .salary-table td:nth-child(1) { width: 30%; }
         .salary-table th:nth-child(2), .salary-table td:nth-child(2) { width: 20%; white-space: nowrap; padding-right: 20px;}
         .salary-table th:nth-child(3), .salary-table td:nth-child(3) { width: 30%; padding-left: 20px;}
@@ -399,9 +399,15 @@
     <!-- --- Input Form --- -->
     <div class="form-container no-print">
         <div class="section-title">Company Details</div>
-        <div class="form-group">
-            <label>Company PAN</label>
-            <input type="text" id="in-company-pan" value="AAOCR1220Q" oninput="updateSlip()">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Company Email</label>
+                <input type="email" id="in-company-email" value="hello@redcoupons.com" oninput="updateSlip()">
+            </div>
+            <div class="form-group">
+                <label>Company PAN</label>
+                <input type="text" id="in-company-pan" value="AAOCR1220Q" oninput="updateSlip()">
+            </div>
         </div>
 
         <div class="section-title">Employee Details</div>
@@ -469,7 +475,8 @@
                 <h1>REDCOUPONS PRIVATE LIMITED</h1>
                 <p>Ward No. 29, Pani Tanki Ke Pass, Nokha Bikaner - 334803 India</p>
                 <div class="meta-info">
-                    <strong>CIN:</strong> U73100RJ2024PTC098563 &nbsp;|&nbsp; <strong>PAN:</strong> <span id="out-company-pan">AAOCR1220Q</span>
+                    <strong>CIN:</strong> U73100RJ2024PTC098563 &nbsp;|&nbsp; <strong>PAN:</strong> <span id="out-company-pan">AAOCR1220Q</span><br>
+                    <strong>Email:</strong> <span id="out-company-email">hello@redcoupons.com</span>
                 </div>
             </div>
         </div>
@@ -620,6 +627,7 @@
         function updateSlip() {
             // Update Basic Info
             document.getElementById('out-company-pan').innerText = document.getElementById('in-company-pan').value;
+            document.getElementById('out-company-email').innerText = document.getElementById('in-company-email').value;
             document.getElementById('out-emp-name').innerText = document.getElementById('in-emp-name').value;
             document.getElementById('out-emp-id').innerText = document.getElementById('in-emp-id').value;
             document.getElementById('out-emp-pan').innerText = document.getElementById('in-emp-pan').value;
