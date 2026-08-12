@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Slip Generator - RedCoupons</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #f0483e;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --bg-body: #f3f4f6;
+            --bg-panel: #ffffff;
+            --success-color: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 30px;
+            color: var(--text-main);
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* --- Form Container --- */
+        .form-container {
+            background: var(--bg-panel);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .form-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .form-container::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+            margin-top: 25px;
+        }
+        .section-title:first-child { margin-top: 0; }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        .form-row .form-group { margin-bottom: 0; }
+
+        label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(240, 72, 62, 0.1);
+        }
+
+        /* Dynamic Rows Styling */
+        .dynamic-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .dynamic-row input[type="text"] { flex: 2; }
+        .dynamic-row input[type="number"] { flex: 1; text-align: right; }
+        
+        .btn-icon {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .btn-icon:hover { background: #fca5a5; }
+
+        .btn-add {
+            background: none;
+            border: 1px dashed var(--border-color);
+            color: var(--primary-color);
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .btn-add:hover {
+            border-color: var(--primary-color);
+            background: rgba(240, 72, 62, 0.02);
+        }
+
+        .btn-print {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 14px 20px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .btn-print:hover {
+            background: #d13d33;
+        }
+
+        /* --- A4 Payslip Styling --- */
+        .payslip-container {
+            background: #fff;
+            width: 210mm;
+            min-height: 240mm; /* Roughly 80% of A4 height */
+            padding: 25mm 20mm;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 35px;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 90px;
+            height: auto;
+            margin-right: 25px;
+        }
+
+        .company-details h1 {
+            margin: 0 0 8px 0;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+        }
+
+        .company-details p {
+            margin: 3px 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .company-details .meta-info {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #4b5563;
+        }
+
+        .slip-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-box {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 35px;
+            align-items: stretch;
+            gap: 20px;
+        }
+
+        .employee-details {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 140px 10px 1fr;
+            row-gap: 12px;
+            font-size: 14px;
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .employee-details span.label {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .employee-details span.val {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .net-pay-highlight {
+            width: 35%; /* Increased width to accommodate larger numbers */
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 1px solid #a7f3d0;
+            padding: 20px 15px;
+            text-align: center;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);
+        }
+
+        .net-pay-highlight .amount {
+            font-size: 28px; /* Adjusted down slightly so 10,00,000.00 fits perfectly */
+            font-weight: 700;
+            color: #047857;
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+
+        .net-pay-highlight .text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #059669;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .salary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            table-layout: fixed; /* Ensures rigid column widths */
+        }
+
+        .salary-table th {
+            background-color: #f3f4f6;
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        /* Adjusted widths to give amounts more space so decimals don't overlap borders */
+        .salary-table th:nth-child(1), .salary-table td:nth-child(1) { width: 30%; }
+        .salary-table th:nth-child(2), .salary-table td:nth-child(2) { width: 20%; white-space: nowrap; padding-right: 20px;}
+        .salary-table th:nth-child(3), .salary-table td:nth-child(3) { width: 30%; padding-left: 20px;}
+        .salary-table th:nth-child(4), .salary-table td:nth-child(4) { width: 20%; white-space: nowrap; padding-right: 20px;}
+
+        .salary-table th.right-align, .salary-table td.right-align {
+            text-align: right;
+        }
+
+        .salary-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: top;
+            word-wrap: break-word; 
+        }
+        
+        .salary-table td:nth-child(2), .salary-table th:nth-child(2) {
+            border-right: 1px solid var(--border-color);
+        }
+
+        .salary-table tr.total-row td {
+            font-weight: 700;
+            border-top: 2px solid var(--border-color);
+            background-color: #f9fafb;
+            font-size: 15px;
+        }
+
+        .net-payable-box {
+            background: #f9fafb;
+            color: var(--text-main);
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .net-payable-box .title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .net-payable-box .subtext {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        .net-payable-box .final-amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .amount-words {
+            font-style: italic;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 50px;
+            background: #f9fafb;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--border-color);
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        /* --- Print Media Query --- */
+        @media print {
+            body {
+                background: none;
+                margin: 0;
+                padding: 0;
+                display: block;
+            }
+            .form-container {
+                display: none;
+            }
+            .payslip-container {
+                box-shadow: none;
+                border: none;
+                width: 100%;
+                min-height: auto;
+                margin: 0;
+                padding: 10mm;
+            }
+            @page {
+                size: A4;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- --- Input Form --- -->
+    <div class="form-container no-print">
+        <div class="section-title">Company Details</div>
+        <div class="form-group">
+            <label>Company PAN</label>
+            <input type="text" id="in-company-pan" value="AAOCR1220Q" oninput="updateSlip()">
+        </div>
+
+        <div class="section-title">Employee Details</div>
+        <div class="form-group">
+            <label>Employee Name</label>
+            <input type="text" id="in-emp-name" value="Kanaiyalal Meghrajbhai Jain" oninput="updateSlip()">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Employee ID</label>
+                <input type="text" id="in-emp-id" value="RCO001" oninput="updateSlip()">
+            </div>
+            <div class="form-group">
+                <label>Employee PAN</label>
+                <input type="text" id="in-emp-pan" value="AXXPJ9819Q" oninput="updateSlip()">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Pay Month</label>
+                <input type="month" id="in-pay-period" value="2025-10" onchange="autoCalculateDays()" oninput="updateSlip()">
+            </div>
+            <div class="form-group">
+                <label>Pay Date</label>
+                <input type="date" id="in-pay-date" value="2025-11-10" oninput="updateSlip()">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Paid Days</label>
+                <input type="number" id="in-paid-days" value="31" oninput="updateSlip()">
+            </div>
+            <div class="form-group">
+                <label>Payment Medium</label>
+                <select id="in-payment-medium" oninput="updateSlip()">
+                    <option value="Bank Transfer">Bank Transfer</option>
+                    <option value="Cheque">Cheque</option>
+                    <option value="Cash">Cash</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section-title">Earnings</div>
+        <div id="earnings-container">
+            <!-- Dynamic rows injected here -->
+        </div>
+        <button type="button" class="btn-add" onclick="addRow('earnings-container', '', '')">+ Add New Earning</button>
+
+        <div class="section-title">Deductions</div>
+        <div id="deductions-container">
+            <!-- Dynamic rows injected here -->
+        </div>
+        <button type="button" class="btn-add" onclick="addRow('deductions-container', '', '')">+ Add New Deduction</button>
+
+        <button class="btn-print" onclick="window.print()">Generate & Print Payslip</button>
+    </div>
+
+    <!-- --- Output Payslip (A4 Size) --- -->
+    <div class="payslip-container">
+        <div class="header">
+            <img src="redcoupons-icon.png" alt="RedCoupons Logo" class="logo">
+            <div class="company-details">
+                <h1>REDCOUPONS PRIVATE LIMITED</h1>
+                <p>Ward No. 29, Pani Tanki Ke Pass, Nokha Bikaner - 334803 India</p>
+                <div class="meta-info">
+                    <strong>CIN:</strong> U73100RJ2024PTC098563 &nbsp;|&nbsp; <strong>PAN:</strong> <span id="out-company-pan">AAOCR1220Q</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="slip-title">
+            Payslip For the Month of <span id="out-title-period">October 2025</span>
+        </div>
+
+        <div class="summary-box">
+            <div class="employee-details">
+                <span class="label">Employee Name</span><span>:</span><span class="val" id="out-emp-name">Kanaiyalal Meghrajbhai Jain</span>
+                <span class="label">Employee ID</span><span>:</span><span class="val" id="out-emp-id">RCO001</span>
+                <span class="label">Pay Period</span><span>:</span><span class="val" id="out-pay-period">October 2025</span>
+                <span class="label">Paid Days</span><span>:</span><span class="val" id="out-paid-days">31</span>
+                <span class="label">Pay Date</span><span>:</span><span class="val" id="out-pay-date">10/11/2025</span>
+                <span class="label">Employee PAN</span><span>:</span><span class="val" id="out-emp-pan">AXXPJ9819Q</span>
+                <span class="label">Payment Medium</span><span>:</span><span class="val" id="out-payment-medium">Bank Transfer</span>
+            </div>
+            <div class="net-pay-highlight">
+                <span class="amount" id="out-highlight-net">₹0.00</span>
+                <span class="text">Total Net Pay</span>
+            </div>
+        </div>
+
+        <table class="salary-table">
+            <thead>
+                <tr>
+                    <th>EARNINGS</th>
+                    <th class="right-align">AMOUNT</th>
+                    <th>DEDUCTIONS</th>
+                    <th class="right-align">AMOUNT</th>
+                </tr>
+            </thead>
+            <tbody id="out-table-body">
+                <!-- Dynamically populated -->
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td>Gross Earnings</td>
+                    <td class="right-align" id="out-gross">₹0.00</td>
+                    <td>Total Deductions</td>
+                    <td class="right-align" id="out-total-deductions">₹0.00</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="net-payable-box">
+            <div>
+                <div class="title">TOTAL NET PAYABLE</div>
+                <div class="subtext">Gross Earnings - Total Deductions</div>
+            </div>
+            <div class="final-amount" id="out-final-net">₹0.00</div>
+        </div>
+        
+        <div class="amount-words" id="out-words">
+            Amount In Words: Indian Rupee Zero Only
+        </div>
+
+        <div class="footer">
+            - This is a system-generated document. -
+        </div>
+    </div>
+
+    <script>
+        // Number to Words Converter (Indian Numbering System)
+        function numberToWords(num) {
+            if (num === 0) return 'Zero';
+            if (num < 0) return 'Negative';
+            
+            let a = ['','One ','Two ','Three ','Four ', 'Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
+            let b = ['', '', 'Twenty','Thirty','Forty','Fifty', 'Sixty','Seventy','Eighty','Ninety'];
+            
+            if ((num = num.toString()).length > 9) return 'Overflow';
+            
+            let n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+            if (!n) return; 
+            
+            let str = '';
+            str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+            str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+            str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+            str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+            str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+            
+            return str.trim();
+        }
+
+        // Handles standard Indian comma separation
+        function formatMoney(amount) {
+            return '₹' + amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatMonthString(yyyy_mm) {
+            if(!yyyy_mm) return "";
+            const [year, month] = yyyy_mm.split('-');
+            const date = new Date(year, month - 1);
+            return date.toLocaleString('en-IN', { month: 'long', year: 'numeric' });
+        }
+
+        function formatDateString(yyyy_mm_dd) {
+            if(!yyyy_mm_dd) return "";
+            const [year, month, day] = yyyy_mm_dd.split('-');
+            return `${day}/${month}/${year}`;
+        }
+
+        // Auto-update Paid Days based on Month selection
+        function autoCalculateDays() {
+            const payMonthInput = document.getElementById('in-pay-period').value;
+            if (payMonthInput) {
+                const [year, month] = payMonthInput.split('-');
+                // Passing '0' to the day parameter returns the last day of the given month/year
+                const daysInSelectedMonth = new Date(year, month, 0).getDate();
+                document.getElementById('in-paid-days').value = daysInSelectedMonth;
+            }
+            updateSlip();
+        }
+
+        // Add dynamic row for Earnings/Deductions
+        function addRow(containerId, defaultName = '', defaultAmount = '') {
+            const container = document.getElementById(containerId);
+            const row = document.createElement('div');
+            row.className = 'dynamic-row';
+            
+            row.innerHTML = `
+                <input type="text" class="item-name" placeholder="Description" value="${defaultName}" oninput="updateSlip()">
+                <input type="number" class="item-amount" placeholder="Amount" value="${defaultAmount !== '' ? defaultAmount : ''}" oninput="updateSlip()">
+                <button type="button" class="btn-icon" onclick="this.parentElement.remove(); updateSlip();" title="Remove">&times;</button>
+            `;
+            container.appendChild(row);
+            updateSlip();
+        }
+
+        // Get data from dynamic rows, keeping empty ones for structural integrity
+        function getRowData(containerId) {
+            const container = document.getElementById(containerId);
+            const rows = container.querySelectorAll('.dynamic-row');
+            let data = [];
+            rows.forEach(row => {
+                const name = row.querySelector('.item-name').value.trim();
+                const amountInput = row.querySelector('.item-amount').value;
+                const amount = amountInput === '' ? null : (parseFloat(amountInput) || 0);
+                data.push({ name, amount });
+            });
+            return data;
+        }
+
+        // Real-time Update Logic
+        function updateSlip() {
+            // Update Basic Info
+            document.getElementById('out-company-pan').innerText = document.getElementById('in-company-pan').value;
+            document.getElementById('out-emp-name').innerText = document.getElementById('in-emp-name').value;
+            document.getElementById('out-emp-id').innerText = document.getElementById('in-emp-id').value;
+            document.getElementById('out-emp-pan').innerText = document.getElementById('in-emp-pan').value;
+            
+            // Format and update Dates
+            const payPeriodRaw = document.getElementById('in-pay-period').value;
+            const formattedPeriod = formatMonthString(payPeriodRaw);
+            document.getElementById('out-title-period').innerText = formattedPeriod;
+            document.getElementById('out-pay-period').innerText = formattedPeriod;
+
+            const payDateRaw = document.getElementById('in-pay-date').value;
+            document.getElementById('out-pay-date').innerText = formatDateString(payDateRaw);
+
+            document.getElementById('out-paid-days').innerText = document.getElementById('in-paid-days').value;
+            document.getElementById('out-payment-medium').innerText = document.getElementById('in-payment-medium').value;
+
+            // Fetch dynamic earnings & deductions
+            const earnings = getRowData('earnings-container');
+            const deductions = getRowData('deductions-container');
+
+            // Build Table and Calculate Totals
+            const tbody = document.getElementById('out-table-body');
+            tbody.innerHTML = '';
+            
+            let totalEarnings = 0;
+            let totalDeductions = 0;
+            
+            const maxRows = Math.max(earnings.length, deductions.length);
+            
+            for (let i = 0; i < maxRows; i++) {
+                const e = earnings[i] || { name: '', amount: null };
+                const d = deductions[i] || { name: '', amount: null };
+                
+                totalEarnings += e.amount || 0;
+                totalDeductions += d.amount || 0;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${e.name}</td>
+                    <td class="right-align">${e.amount !== null ? formatMoney(e.amount) : ''}</td>
+                    <td>${d.name}</td>
+                    <td class="right-align">${d.amount !== null ? formatMoney(d.amount) : ''}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            const netPay = totalEarnings - totalDeductions;
+
+            // Update DOM Totals
+            document.getElementById('out-gross').innerText = formatMoney(totalEarnings);
+            document.getElementById('out-total-deductions').innerText = formatMoney(totalDeductions);
+            document.getElementById('out-highlight-net').innerText = formatMoney(netPay);
+            document.getElementById('out-final-net').innerText = formatMoney(netPay);
+
+            // Update words
+            const words = numberToWords(netPay);
+            document.getElementById('out-words').innerText = `Amount In Words: Indian Rupee ${words} Only`;
+        }
+
+        // Initialize with default values on load
+        window.onload = function() {
+            // Ensure month calculation runs once on load for the default month
+            autoCalculateDays();
+
+            // Seed exactly 5 rows on each side for structural integrity
+            addRow('earnings-container', 'Basic', 78000);
+            addRow('earnings-container', 'House Rent Allowance', 0);
+            addRow('earnings-container', '', '');
+            addRow('earnings-container', '', '');
+            addRow('earnings-container', '', '');
+            
+            addRow('deductions-container', 'Income Tax', 0);
+            addRow('deductions-container', 'Provident Fund', 0);
+            addRow('deductions-container', '', '');
+            addRow('deductions-container', '', '');
+            addRow('deductions-container', '', '');
+            
+            updateSlip();
+        };
+    </script>
+</body>
+</html>
