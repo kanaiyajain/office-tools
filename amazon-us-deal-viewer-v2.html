@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,7 +29,8 @@
     .filter-label { font-size: 11px; font-weight: 700; color: #475569; }
     .input-control { width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); font-size: 12px; }
     .range-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #f1f5f9; }
+    .content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #f1f5f9; position: relative; }
+    .drop-overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(37, 99, 235, 0.1); border: 3px dashed var(--primary); z-index: 1000; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: var(--primary); }
     .sheet-toolbar { padding: 10px 20px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
     .toolbar-stats { font-size: 13px; font-weight: 600; color: var(--text-muted); }
     .view-toggle { display: flex; background: #e2e8f0; border-radius: 6px; padding: 2px; }
@@ -71,11 +71,11 @@
       <div class="brand-icon">A</div>
       <div class="header-title">
         <h1>Offline Amazon Data Viewer</h1>
-        <p>Import your JSON files to view, filter, sort, and paginate.</p>
+        <p>Import your shared JSON files to view, filter, sort, and paginate.</p>
       </div>
     </div>
     <div class="header-actions">
-      <input type="file" id="importJsonInput" accept=".json" style="display: none;" />
+      <input type="file" id="importJsonInput" accept=".json, .txt" style="display: none;" />
       <button id="importJsonBtn" class="btn btn-import">📂 Import JSON</button>
       <button id="exportJsonBtn" class="btn btn-share">📤 Export JSON</button>
       <button id="exportCsvBtn" class="btn btn-primary">📊 Export CSV</button>
@@ -115,6 +115,7 @@
       <div class="filter-group"><label class="filter-label">Items per page</label><select id="itemsPerPageSelect" class="input-control"><option value="50">50</option><option value="100" selected>100</option><option value="200">200</option><option value="500">500</option></select></div>
     </aside>
     <main class="content-area">
+      <div id="dropOverlay" class="drop-overlay">Drop JSON File Here</div>
       <div class="sheet-toolbar">
         <div class="toolbar-stats">Showing <strong id="visibleCount">0</strong> out of <strong id="totalCount">0</strong> products</div>
         <div class="view-toggle">
@@ -126,7 +127,7 @@
         <div id="cardsGrid" class="cards-grid">
             <div style="text-align:center; padding:40px; grid-column: 1/-1; color:#64748b;">
                 <h2>Welcome to the Offline Viewer</h2>
-                <p style="margin-top: 10px;">Click "Import JSON" in the top right to load your Amazon data.</p>
+                <p style="margin-top: 10px;">Drag and Drop your JSON file here, or click "Import JSON".</p>
             </div>
         </div>
       </div>
@@ -190,7 +191,21 @@
         importJsonInput.click(); 
       });
       
-      importJsonInput.addEventListener('change', handleImportFile);
+      importJsonInput.addEventListener('change', (e) => {
+        if(e.target.files.length > 0) processFile(e.target.files[0]);
+      });
+
+      // Drag and drop support
+      const dropOverlay = document.getElementById('dropOverlay');
+      document.body.addEventListener('dragover', (e) => { e.preventDefault(); dropOverlay.style.display = 'flex'; });
+      dropOverlay.addEventListener('dragleave', (e) => { e.preventDefault(); dropOverlay.style.display = 'none'; });
+      dropOverlay.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropOverlay.style.display = 'none';
+        if (e.dataTransfer.files.length > 0) {
+            processFile(e.dataTransfer.files[0]);
+        }
+      });
 
       filterInputs.forEach(input => input.addEventListener('input', applyFiltersAndRender));
       itemsPerPageSelect.addEventListener('change', (e) => { itemsPerPage = parseInt(e.target.value); currentPage = 1; renderCurrentPage(); });
@@ -220,7 +235,7 @@
         if (confirm("Clear all data from the viewer?")) { 
             allProducts = []; 
             applyFiltersAndRender(); 
-            cardsGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1; color:#64748b;"><h2>Data Cleared</h2><p style="margin-top: 10px;">Click "Import JSON" to load new data.</p></div>';
+            cardsGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1; color:#64748b;"><h2>Data Cleared</h2><p style="margin-top: 10px;">Drag and Drop your JSON file here, or click "Import JSON".</p></div>';
         } 
       }
 
@@ -238,8 +253,18 @@
       function applyFiltersAndRender() {
         populateDynamicDropdowns();
 
+        if (allProducts.length === 0) {
+            totalCount.textContent = "0";
+            visibleCount.textContent = "0";
+            pageIndicator.textContent = "Page 1 of 1";
+            prevPageBtn.disabled = true;
+            nextPageBtn.disabled = true;
+            return;
+        }
+
         const k = kw.value.toLowerCase().trim(); const b = brand.value; const c = cat.value; const a = avail.value; const d = deal.value;
         const parseF = (el, def) => { const v = parseFloat(el.value); return isNaN(v) ? def : v; };
+
         const minPrice = parseF(minP, 0); const maxPrice = parseF(maxP, Infinity);
         const minRating = parseF(minRat, 0); const maxRating = parseF(maxRat, 5);
         const minReview = parseF(minRev, 0); const maxReview = parseF(maxRev, Infinity);
@@ -388,35 +413,55 @@
         const dl = document.createElement("a"); dl.href = dataStr; dl.download = `amazon_connect_us_${allProducts.length}_items.json`; dl.click();
       }
 
-      function handleImportFile(e) {
-        const file = e.target.files[0]; if (!file) return;
+      // Robust JSON Parsing logic for malformed concatenated curl dumps
+      function processFile(file) {
         const reader = new FileReader();
         reader.onload = (ev) => {
-          try {
-            const parsed = JSON.parse(ev.target.result);
-            let items = Array.isArray(parsed) ? parsed : (parsed.products || parsed.asinInfoList || []);
-            if (!items.length) return alert("No items found in JSON.");
-            
-            let merge = false;
-            if (allProducts.length > 0) {
-              merge = confirm(`Found ${items.length} items.
+            try {
+                let text = ev.target.result.trim();
+                
+                // Smart fix for concatenated JSON objects (e.g. { ... }{ ... })
+                let fixedText = text.replace(/}\s*\{/g, '},{');
+                if (fixedText.startsWith('{') && fixedText.endsWith('}')) {
+                    fixedText = '[' + fixedText + ']';
+                }
 
-OK to MERGE with current list.
-Cancel to OVERWRITE current list.`);
-            }
+                let parsed;
+                try {
+                    parsed = JSON.parse(fixedText);
+                } catch(err) {
+                    parsed = JSON.parse(text); // Try raw text if fallback fails
+                }
 
-            const map = new Map();
-            if (merge) {
-              allProducts.forEach(p => p.asin && map.set(p.asin, p));
+                let items = [];
+                const dataArray = Array.isArray(parsed) ? parsed : [parsed];
+                dataArray.forEach(obj => {
+                    if (obj.asinInfoList && Array.isArray(obj.asinInfoList)) items.push(...obj.asinInfoList);
+                    else if (obj.products && Array.isArray(obj.products)) items.push(...obj.products);
+                    else if (obj.items && Array.isArray(obj.items)) items.push(...obj.items);
+                    else items.push(obj); 
+                });
+
+                if (items.length === 0) return alert("No valid products found in this JSON file.");
+
+                let merge = false;
+                if (allProducts.length > 0) {
+                    merge = confirm(`Found ${items.length} items in file.\n\nOK to MERGE with current list.\nCancel to OVERWRITE current list.`);
+                }
+
+                const map = new Map();
+                if (merge) {
+                    allProducts.forEach(p => p.asin && map.set(p.asin, p));
+                }
+                items.forEach(p => p.asin && map.set(p.asin, p));
+                
+                allProducts = Array.from(map.values());
+                
+                alert(`Success! Loaded ${map.size} unique items.`);
+                applyFiltersAndRender();
+            } catch (err) { 
+                alert("Error reading JSON: " + err.message + "\nMake sure the file contains valid JSON data."); 
             }
-            items.forEach(p => p.asin && map.set(p.asin, p));
-            
-            allProducts = Array.from(map.values());
-            
-            alert(`Success! Loaded ${map.size} unique items.`);
-            applyFiltersAndRender();
-            
-          } catch (err) { alert("Invalid JSON: " + err.message); }
         };
         reader.readAsText(file);
       }
@@ -424,18 +469,15 @@ Cancel to OVERWRITE current list.`);
       function exportToCSV() {
         if (!currentFilteredProducts.length) return alert("No data.");
         const headers = ["ASIN","Brand","Title","Price(USD)","MRP(USD)","Discount%","Status","Rating","Reviews","Exp.RPC","HasDeal","DealLabel","Category","ImageURL"];
-        let csv = "﻿" + headers.join(",") + "
-";
+        let csv = "\uFEFF" + headers.join(",") + "\n";
         currentFilteredProducts.forEach(p => {
           const row = [ p.asin, p.asinBrand, p.displayTitle||p.dedupeString, p.buyingPrice?.amount, p.listPrice?.amount, p.dealMetadata?.discountPercentage, p.availability, p.numberOfReviewStars, p.reviewCount, p.expectedRevenuePerClick, p.dealBadge?"YES":"NO", p.dealBadge?.label, p.category, getResizedImageUrl(p.imageUrl) ].map(v => `"${(v||"").toString().replace(/"/g, '""')}"`);
-          csv += row.join(",") + "
-";
+          csv += row.join(",") + "\n";
         });
         const dl = document.createElement("a"); dl.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); dl.download = `amazon_connect_us_filtered_${currentFilteredProducts.length}.csv`; dl.click();
       }
+
       function escapeHtml(str) { return str ? String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") : ""; }
-      
-      applyFiltersAndRender();
     });
   </script>
 </body>
