@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSV Product Viewer</title>
+<style>
+:root{
+  --bg:#f5f7fb; --card:#fff; --text:#172033; --muted:#667085; --line:#e5e7eb;
+  --primary:#2563eb; --primary2:#1d4ed8; --good:#078a57; --shadow:0 8px 28px rgba(16,24,40,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{position:sticky;top:0;z-index:20;background:rgba(245,247,251,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top{max-width:1600px;margin:auto;padding:16px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+h1{font-size:20px;margin:0 18px 0 0}
+button,.file-label{border:1px solid #d0d5dd;background:#fff;color:#344054;border-radius:9px;padding:9px 13px;font-weight:600;cursor:pointer}
+button:hover,.file-label:hover{border-color:#98a2b3;background:#f9fafb}
+.primary{background:var(--primary);border-color:var(--primary);color:#fff}.primary:hover{background:var(--primary2);color:#fff}
+.danger{color:#b42318}
+input[type=file]{display:none}
+.stats{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.stat{background:#fff;border:1px solid var(--line);padding:7px 11px;border-radius:8px;font-size:13px;color:var(--muted)}
+.stat b{color:var(--text)}
+.controls{max-width:1600px;margin:auto;padding:12px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.search{min-width:260px;flex:1;max-width:520px;padding:10px 12px;border:1px solid #d0d5dd;border-radius:9px;font-size:14px}
+select{padding:10px 12px;border:1px solid #d0d5dd;border-radius:9px;background:#fff}
+.notice{max-width:1600px;margin:10px auto;padding:0 20px}
+.notice-inner{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:10px 12px;border-radius:9px;font-size:13px}
+.table-wrap{max-width:1600px;margin:12px auto 40px;padding:0 20px}
+.table-card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:auto;max-height:calc(100vh - 170px)}
+table{border-collapse:separate;border-spacing:0;min-width:100%;font-size:13px}
+th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top;white-space:nowrap}
+th{position:sticky;top:0;background:#f8fafc;z-index:5;font-size:12px;color:#475467;text-transform:none}
+tr:last-child td{border-bottom:0} td:last-child,th:last-child{border-right:0}
+tbody tr:hover{background:#f8fbff}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.image-cell{width:92px;text-align:center;white-space:normal}
+.thumb{width:64px;height:64px;border:1px solid var(--line);border-radius:8px;object-fit:contain;background:#fff;display:block;margin:auto}
+.thumb-error{width:64px;height:64px;display:flex;align-items:center;justify-content:center;margin:auto;background:#f2f4f7;color:#98a2b3;border-radius:8px;font-size:11px}
+.title-cell{min-width:280px;max-width:520px;white-space:normal}
+.title-link{font-weight:600;color:#1d4ed8;text-decoration:none}
+.title-link:hover{text-decoration:underline}
+a.url{color:#2563eb;text-decoration:none}.url:hover{text-decoration:underline}
+.badge{display:inline-block;padding:3px 7px;border-radius:999px;background:#f2f4f7;color:#475467;font-size:11px;margin:2px 3px 2px 0}
+.empty{color:#98a2b3}
+.drop{border:2px dashed #cbd5e1;border-radius:12px;padding:28px;text-align:center;background:#fff;margin:20px auto;max-width:900px}
+.drop.drag{border-color:var(--primary);background:#eff6ff}
+.hidden{display:none!important}
+.pagination{max-width:1600px;margin:10px auto 0;padding:0 20px;display:flex;gap:8px;align-items:center}
+.page-info{font-size:13px;color:var(--muted);margin:0 8px}
+@media(max-width:700px){.stats{margin-left:0}.table-card{max-height:calc(100vh - 230px)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1>CSV Product Viewer</h1>
+    <label class="file-label primary">＋ Add CSV File<input id="fileInput" type="file" accept=".csv,text/csv"></label>
+    <button id="openAll" class="primary" disabled>↗ Open All Links</button>
+    <button id="copyLinks" disabled>Copy All Links</button>
+    <button id="clearBtn" class="danger" disabled>Clear</button>
+    <div class="stats">
+      <div class="stat">Rows: <b id="rowCount">0</b></div>
+      <div class="stat">Columns: <b id="colCount">0</b></div>
+      <div class="stat">Links: <b id="linkCount">0</b></div>
+    </div>
+  </div>
+  <div class="controls">
+    <input id="search" class="search" placeholder="Search any field…">
+    <select id="pageSize"><option>25</option><option>50</option><option>100</option><option>250</option><option>500</option></select>
+    <span style="font-size:13px;color:#667085">rows/page</span>
+  </div>
+</header>
+
+<div id="notice" class="notice hidden"><div class="notice-inner" id="noticeText"></div></div>
+<div id="dropZone" class="drop">
+  <strong>Drop a CSV file here</strong><br>
+  or click <b>Add CSV File</b> above.
+  <div style="margin-top:8px;color:#667085;font-size:13px">Columns are detected automatically. Extra/new fields are supported.</div>
+</div>
+
+<div id="tableWrap" class="table-wrap hidden">
+  <div class="table-card"><table id="dataTable"><thead></thead><tbody></tbody></table></div>
+</div>
+<div id="pagination" class="pagination hidden">
+  <button id="prev">‹ Prev</button><span id="pageInfo" class="page-info"></span><button id="next">Next ›</button>
+</div>
+
+<script>
+let rows=[], headers=[], filtered=[], page=1;
+const $=id=>document.getElementById(id);
+
+function parseCSV(text){
+  text=text.replace(/^\uFEFF/,'');
+  const out=[]; let row=[], field='', quoted=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i], n=text[i+1];
+    if(quoted){
+      if(c==='"' && n==='"'){field+='"';i++}
+      else if(c==='"') quoted=false;
+      else field+=c;
+    }else{
+      if(c==='"') quoted=true;
+      else if(c===','){row.push(field);field=''}
+      else if(c==='\n'){row.push(field);out.push(row);row=[];field=''}
+      else if(c==='\r'){}
+      else field+=c;
+    }
+  }
+  if(field!=='' || row.length) {row.push(field);out.push(row)}
+  if(!out.length) return {headers:[],rows:[]};
+  const h=out[0].map(x=>String(x||'').trim());
+  const data=out.slice(1).filter(r=>r.some(v=>String(v??'').trim()!=='')).map(r=>{
+    const o={}; h.forEach((k,i)=>o[k]=r[i]??''); return o;
+  });
+  return {headers:h,rows:data};
+}
+
+function norm(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'')}
+function isImageColumn(h){return /^(image|img|thumbnail|photo|picture|productimage|imageurl|image_url)$/i.test(String(h).trim()) || /image|thumbnail|photo/i.test(h)}
+function isUrlColumn(h){return /url|link|website|product/i.test(h) && !/image/i.test(h)}
+function isTitleColumn(h){return /^(title|name|productname|producttitle)$/i.test(norm(h)) || /title|name/i.test(h)}
+function getImageUrl(v){
+  const s=String(v||'').trim();
+  if(!s) return '';
+  const m=s.match(/(?:src=["']?)(https?:\/\/[^"' >]+)/i);
+  if(m) return m[1];
+  const md=s.match(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/i);
+  if(md) return md[1];
+  const direct=s.match(/https?:\/\/\S+\.(?:jpg|jpeg|png|webp|gif)(?:\?\S*)?/i);
+  return direct ? direct[0].replace(/[),]+$/,'') : '';
+}
+function getTitleImage(row){
+  const titleH=headers.find(isTitleColumn);
+  if(titleH){
+    const img=getImageUrl(row[titleH]);
+    if(img) return img;
+  }
+  const imgH=headers.find(isImageColumn);
+  return imgH ? getImageUrl(row[imgH]) : '';
+}
+function getPrimaryUrl(row){
+  const h=headers.find(h=>/^product\s*url$/i.test(h)) || headers.find(isUrlColumn);
+  if(!h) return '';
+  const s=String(row[h]||'').trim();
+  const m=s.match(/https?:\/\/[^\s<>"']+/i);
+  return m ? m[0] : '';
+}
+function escapeHTML(s){
+  return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function display(v){
+  if(v===null||v===undefined||String(v).trim()==='') return '<span class="empty">—</span>';
+  return escapeHTML(v);
+}
+function linkify(v){
+  const s=String(v||'').trim();
+  const m=s.match(/https?:\/\/[^\s<>"']+/i);
+  if(!m) return display(v);
+  const url=m[0];
+  const rest=s.replace(url,'').trim();
+  return `<a class="url" href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(url)}</a>${rest?' '+escapeHTML(rest):''}`;
+}
+function renderCell(h,row){
+  const v=row[h];
+  if(isImageColumn(h)){
+    const img=getImageUrl(v);
+    if(img) return `<div class="image-cell"><img class="thumb" src="${escapeHTML(img)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;thumb-error&quot;>No image</div>'"></div>`;
+    return display(v);
+  }
+  if(isTitleColumn(h)){
+    const img=getTitleImage(row), url=getPrimaryUrl(row);
+    let t=String(v||'').replace(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/ig,'').replace(/<img[^>]*>/ig,'').trim();
+    const title=escapeHTML(t||v||'');
+    return url ? `<a class="title-link" href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">${title}</a>` : title;
+  }
+  if(isUrlColumn(h) || /https?:\/\//i.test(String(v||''))) return linkify(v);
+  if(typeof v==='number' || (/^-?\d+(?:\.\d+)?$/.test(String(v||'').trim()) && String(v||'').trim()!=='')) return `<span class="num">${escapeHTML(v)}</span>`;
+  if(/badge|tag|offer/i.test(h) && String(v||'').trim()) return String(v).split(/[|,]/).map(x=>`<span class="badge">${escapeHTML(x.trim())}</span>`).join('');
+  return display(v);
+}
+
+function render(){
+  const q=$('search').value.toLowerCase().trim();
+  filtered=rows.filter(r=>!q || headers.some(h=>String(r[h]??'').toLowerCase().includes(q)));
+  const size=Number($('pageSize').value);
+  const pages=Math.max(1,Math.ceil(filtered.length/size)); page=Math.min(page,pages);
+  const start=(page-1)*size, visible=filtered.slice(start,start+size);
+  $('rowCount').textContent=rows.length.toLocaleString();
+  $('colCount').textContent=headers.length.toLocaleString();
+  const links=rows.reduce((n,r)=>n+(getPrimaryUrl(r)?1:0),0);
+  $('linkCount').textContent=links.toLocaleString();
+  $('openAll').disabled=links===0;
+  $('copyLinks').disabled=links===0;
+  $('clearBtn').disabled=rows.length===0;
+  $('tableWrap').classList.toggle('hidden',rows.length===0);
+  $('pagination').classList.toggle('hidden',rows.length===0);
+
+  $('dataTable').querySelector('thead').innerHTML='<tr>'+headers.map(h=>`<th>${escapeHTML(h)}</th>`).join('')+'</tr>';
+  $('dataTable').querySelector('tbody').innerHTML=visible.map(r=>'<tr>'+headers.map(h=>`<td class="${isTitleColumn(h)?'title-cell':''}">${renderCell(h,r)}</td>`).join('')+'</tr>').join('');
+  $('pageInfo').textContent=`Page ${page} of ${pages} · Showing ${start+1}-${Math.min(start+size,filtered.length)} of ${filtered.length}`;
+  $('prev').disabled=page<=1; $('next').disabled=page>=pages;
+}
+
+function loadText(text,name){
+  const parsed=parseCSV(text);
+  headers=parsed.headers; rows=parsed.rows; page=1;
+  if(!headers.length){showNotice('Could not find a CSV header row.','bad');return}
+  $('dropZone').classList.add('hidden');
+  showNotice(`Loaded <b>${escapeHTML(name)}</b> · ${rows.length.toLocaleString()} rows · ${headers.length} columns.`, 'ok');
+  render();
+}
+function showNotice(msg,type){
+  $('notice').classList.remove('hidden');
+  $('noticeText').innerHTML=msg;
+  $('noticeText').style.background=type==='bad'?'#fef3f2':'#eff6ff';
+  $('noticeText').style.color=type==='bad'?'#b42318':'#1e40af';
+}
+function readFile(file){
+  if(!file || !/\.csv$/i.test(file.name)){showNotice('Please select a CSV file.','bad');return}
+  const reader=new FileReader();
+  reader.onload=()=>loadText(reader.result,file.name);
+  reader.onerror=()=>showNotice('Unable to read this file.','bad');
+  reader.readAsText(file);
+}
+$('fileInput').addEventListener('change',e=>readFile(e.target.files[0]));
+$('search').addEventListener('input',()=>{page=1;render()});
+$('pageSize').addEventListener('change',()=>{page=1;render()});
+$('prev').onclick=()=>{if(page>1){page--;render()}};
+$('next').onclick=()=>{page++;render()};
+$('clearBtn').onclick=()=>{
+  rows=[];headers=[];filtered=[];$('fileInput').value='';$('tableWrap').classList.add('hidden');$('pagination').classList.add('hidden');
+  $('dropZone').classList.remove('hidden');$('openAll').disabled=true;$('copyLinks').disabled=true;$('clearBtn').disabled=true;
+  $('rowCount').textContent='0';$('colCount').textContent='0';$('linkCount').textContent='0';$('notice').classList.add('hidden');
+};
+
+$('openAll').onclick=()=>{
+  const urls=[...new Set(rows.map(getPrimaryUrl).filter(Boolean))];
+  if(!urls.length)return;
+  let opened=0;
+  urls.forEach((url,i)=>{
+    const w=window.open(url,'_blank','noopener');
+    if(w){opened++; try{w.blur()}catch(e){}}
+  });
+  showNotice(`Requested ${urls.length.toLocaleString()} links in new tabs (${opened.toLocaleString()} windows were accepted by the browser). Your browser may block some pop-ups; allow pop-ups for this local page if needed.`,'ok');
+};
+$('copyLinks').onclick=async()=>{
+  const urls=[...new Set(rows.map(getPrimaryUrl).filter(Boolean))];
+  try{await navigator.clipboard.writeText(urls.join('\\n'));showNotice(`Copied ${urls.length.toLocaleString()} unique links to clipboard.`,'ok')}
+  catch(e){showNotice('Clipboard access was blocked by the browser.','bad')}
+};
+
+const dz=$('dropZone');
+['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag')}));
+['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag')}));
+dz.addEventListener('drop',e=>readFile(e.dataTransfer.files[0]));
+dz.addEventListener('click',()=>document.querySelector('.file-label').click());
+
+// Optional: open a CSV passed through a file:// URL is intentionally not attempted;
+// the page only reads files selected by the user, so the CSV stays local.
+</script>
+</body>
+</html>
