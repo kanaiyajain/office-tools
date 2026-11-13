@@ -346,7 +346,7 @@
             margin: 0;
         }
 
-        /* Spacious Invoice Number Input so full strings like KAJ/2026-27/001 are 100% visible */
+        /* Spacious Invoice Number Input so full strings like 25-26/KAJ/1 are 100% visible */
         .inv-no-input {
             width: 100% !important;
             min-width: 180px !important;
@@ -369,6 +369,65 @@
             display: inline-block;
             max-width: 100%;
             word-break: break-word;
+        }
+
+        /* Hybrid Date Input Container: Keyboard friendly + native calendar popup */
+        .date-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .date-keyboard-input {
+            width: 100% !important;
+            padding-right: 28px !important;
+            font-family: inherit;
+            font-size: 12.5px !important;
+            background: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 4px !important;
+        }
+
+        .date-cal-btn {
+            position: absolute;
+            right: 3px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            line-height: 1;
+            padding: 3px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #475569;
+            transition: background 0.15s ease;
+        }
+
+        .date-cal-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .date-hidden-picker {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 20px;
+            height: 20px;
+            opacity: 0;
+            z-index: -1;
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .clean-ifsc-code {
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
+            font-family: monospace, inherit !important;
+            letter-spacing: 0.5px !important;
         }
 
         .batch-bar {
@@ -921,22 +980,40 @@
             <div>
                 <!-- Issuer Details Card -->
                 <div class="card">
-                    <div class="card-header">
-                        <h2>🏢 Billed From (Header Letterhead)</h2>
-                        <span style="font-size: 11px; color: #64748b;">Top Header Info</span>
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h2>🏢 Billed From (Invoice Issuer / Payee)</h2>
+                            <span style="font-size: 11px; color: #64748b;">Profiles, Tax IDs &amp; Bank Details</span>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="openBilledFromModal()" style="font-size: 11px; padding: 3px 9px;" title="Manage, backup & restore saved Billed From parties">
+                            ⚙️ Manage Profiles
+                        </button>
                     </div>
                     <div class="card-body">
+                        <!-- Quick Select Saved Billed From Profile -->
+                        <div class="form-group" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 9px 12px; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <label style="margin-bottom: 0; font-size: 11.5px; font-weight: 700; color: #0f172a;">Select Saved Profile (Billed From):</label>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="saveCurrentBilledFromParty()" style="font-size: 10.5px; padding: 2px 7px;" title="Save current issuer & bank details as a reusable profile">
+                                    💾 Save Current Profile
+                                </button>
+                            </div>
+                            <select id="savedBilledFromSelect" onchange="applyBilledFromProfile(this.value)" style="width: 100%; font-size: 12.5px; padding: 6px 8px; border-radius: 4px; border: 1px solid #94a3b8; font-weight: 600;">
+                                <option value="">-- Choose from saved Billed From parties --</option>
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                                 <label style="margin-bottom: 0;">Invoice Issuer Name / Company *</label>
                                 <span id="namePrefixBadge" style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-family: monospace;">
-                                    Format: KAJ/2026-27/XXX
+                                    Format: 25-26/KAJ/1
                                 </span>
                             </div>
                             <input type="text" id="issuerName" placeholder="e.g. Kanaiyalal Jain" oninput="handleIssuerNameInput()">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
                                 <span style="font-size: 11px; color: #64748b;">(1st 2 chars of 1st name + 1st char of last name)</span>
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="syncAllInvoiceNumbersWithIssuer()" style="font-size: 10.5px; padding: 2px 7px;" title="Re-format all invoice numbers with current name initials">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="syncAllInvoiceNumbersWithIssuer()" style="font-size: 10.5px; padding: 2px 7px;" title="Re-format all invoice numbers to 25-26/KAJ/1 format">
                                     🔄 Apply to All Invoices
                                 </button>
                             </div>
@@ -984,7 +1061,7 @@
                             </div>
                             <div class="form-group">
                                 <label>IFSC Code *</label>
-                                <input type="text" id="ifsc" placeholder="e.g. SBIN0001234" style="text-transform: uppercase;" oninput="saveAndRefresh()">
+                                <input type="text" id="ifsc" placeholder="e.g. SBIN0001234" style="text-transform: uppercase; font-weight: 700; font-family: monospace; letter-spacing: 0.5px;" oninput="this.value = this.value.toUpperCase(); saveAndRefresh()">
                             </div>
                         </div>
                     </div>
@@ -1240,7 +1317,13 @@
     <div class="form-row">
         <div class="form-group">
             <label>Start Date</label>
-            <input type="date" id="batchStartDate" onchange="updateBatchPrefixFromDate()">
+            <div class="date-input-container">
+                <input type="text" id="batchStartDateText" class="date-keyboard-input" placeholder="DD/MM/YYYY" 
+                       onchange="commitBatchStartDate(this.value)" onblur="commitBatchStartDate(this.value)"
+                       onkeydown="if(event.key==='Enter'){this.blur();}">
+                <button type="button" class="date-cal-btn" onclick="triggerBatchDatePicker()" title="Open calendar">📅</button>
+                <input type="date" id="batchStartDate" class="date-hidden-picker" onchange="pickedBatchStartDate(this.value)">
+            </div>
         </div>
         <div class="form-group">
             <label>Frequency</label>
@@ -1255,7 +1338,7 @@
 
     <div class="form-group">
         <label>Invoice No. Prefix</label>
-        <input type="text" id="batchPrefix" value="KAJ/2026-27/" placeholder="e.g. KAJ/2026-27/">
+        <input type="text" id="batchPrefix" value="25-26/KAJ/" placeholder="e.g. 25-26/KAJ/">
     </div>
 
     <div class="form-group">
@@ -1284,6 +1367,117 @@
     </div>
 </dialog>
 
+<!-- Saved Billed From Parties Master Dialog (Backup & Restore) -->
+<dialog id="billedFromModal" style="border: none; border-radius: 10px; padding: 22px; width: 680px; max-width: 95vw; box-shadow: 0 15px 35px rgba(0,0,0,0.25);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h3 style="margin: 0; font-size: 17px; color: #0f172a;">🏢 Saved Billed From Parties (Backup &amp; Restore)</h3>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeBilledFromModal()" style="font-size: 14px; padding: 2px 8px; line-height: 1;">✕</button>
+    </div>
+    <p style="font-size: 12px; color: #64748b; margin-top: 0; margin-bottom: 14px;">
+        Store all your payee profiles (Issuers, Contractors, Bank Accounts &amp; Tax IDs). Select any profile to instantly fill Billed From &amp; Bank details. Export to JSON for backup or import to restore.
+    </p>
+
+    <!-- Top Action Bar -->
+    <div style="display: flex; justify-content: space-between; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 6px;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('billedFromImportFile').click()" title="Import Billed From profiles from a JSON file (Restore)">
+                📥 Import JSON (Restore)
+            </button>
+            <input type="file" id="billedFromImportFile" accept=".json,application/json" style="display:none;" onchange="importBilledFromJSON(event)">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="exportBilledFromJSON()" title="Export all Billed From profiles to a JSON file (Backup)">
+                📤 Export JSON (Backup)
+            </button>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" onclick="showAddBilledFromForm()">
+            ➕ Add New Profile
+        </button>
+    </div>
+
+    <!-- Inline Add/Edit Form -->
+    <div id="billedFromFormContainer" style="display: none; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 14px; margin-bottom: 14px;">
+        <h4 id="billedFromFormTitle" style="margin-top: 0; margin-bottom: 10px; font-size: 13.5px; color: #1e293b;">Add New Billed From Profile</h4>
+        <input type="hidden" id="editBilledFromId" value="">
+        
+        <div class="form-group" style="margin-bottom: 8px;">
+            <label style="font-size: 11px;">Issuer / Party Name *</label>
+            <input type="text" id="bfFormName" placeholder="e.g. Kanaiyalal Jain" style="font-size: 12px; padding: 5px 8px;">
+        </div>
+
+        <div class="form-row" style="margin-bottom: 8px;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 11px;">PAN Card Number</label>
+                <input type="text" id="bfFormPan" placeholder="e.g. ABCDE1234F" style="text-transform: uppercase; font-size: 12px; padding: 5px 8px;" oninput="this.value = this.value.toUpperCase()">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 11px;">Aadhaar Number</label>
+                <input type="text" id="bfFormAadhar" placeholder="e.g. 1234 5678 9012" style="font-size: 12px; padding: 5px 8px;">
+            </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 8px;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 11px;">Phone</label>
+                <input type="text" id="bfFormPhone" placeholder="+91 98290 12345" style="font-size: 12px; padding: 5px 8px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 11px;">Email Address</label>
+                <input type="email" id="bfFormEmail" placeholder="name@example.com" style="font-size: 12px; padding: 5px 8px;">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 8px;">
+            <label style="font-size: 11px;">Full Address</label>
+            <textarea id="bfFormAddress" rows="2" placeholder="Full residential / office address..." style="font-size: 12px; padding: 5px 8px;"></textarea>
+        </div>
+
+        <div style="font-weight: 700; font-size: 11.5px; color: #334155; margin: 10px 0 6px 0; border-top: 1px solid #e2e8f0; padding-top: 6px;">
+            🏦 Bank Account Details (Payout Info)
+        </div>
+
+        <div class="form-group" style="margin-bottom: 8px;">
+            <label style="font-size: 11px;">Bank Name *</label>
+            <input type="text" id="bfFormBankName" placeholder="e.g. State Bank of India" style="font-size: 12px; padding: 5px 8px;">
+        </div>
+
+        <div class="form-row" style="margin-bottom: 8px;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 11px;">Account Number *</label>
+                <input type="text" id="bfFormAccNo" placeholder="Bank Account Number" style="font-size: 12px; padding: 5px 8px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 11px;">IFSC Code *</label>
+                <input type="text" id="bfFormIfsc" placeholder="e.g. SBIN0004521" style="text-transform: uppercase; font-weight: 700; font-family: monospace; font-size: 12px; padding: 5px 8px;" oninput="this.value = this.value.toUpperCase()">
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="cancelBilledFromForm()">Cancel</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="saveBilledFromFromForm()">Save Profile</button>
+        </div>
+    </div>
+
+    <!-- Profiles Table / List -->
+    <div style="max-height: 280px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <thead style="background: #f1f5f9; position: sticky; top: 0; z-index: 1;">
+                <tr>
+                    <th style="padding: 7px 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">Issuer / Party Name</th>
+                    <th style="padding: 7px 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">Tax ID (PAN/Aadhaar)</th>
+                    <th style="padding: 7px 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">Bank &amp; IFSC</th>
+                    <th style="padding: 7px 10px; text-align: center; border-bottom: 1px solid #cbd5e1; width: 140px;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="billedFromTableBody">
+                <!-- Populated dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeBilledFromModal()">Done / Close</button>
+    </div>
+</dialog>
+
 <!-- ============================================================== -->
 <!-- --- JAVASCRIPT LOGIC & DEPENDENCIES --- -->
 <!-- ============================================================== -->
@@ -1296,7 +1490,11 @@
     window.addEventListener('DOMContentLoaded', () => {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('batchStartDate').value = today;
+        if (document.getElementById('batchStartDateText')) {
+            document.getElementById('batchStartDateText').value = formatCustomDate(today, 'DD/MM/YYYY');
+        }
 
+        loadSavedBilledFromParties();
         loadSavedData();
         if (invoiceList.length === 0) {
             loadSampleData('KAJ');
@@ -1328,29 +1526,43 @@
         return `${firstTwo}${lastOne}`;
     }
 
-    // Calculate Indian Financial Year (e.g. 2026-27 for Nov 2026)
+    // Calculate Indian Financial Year in 2-digit format (e.g. 25-26 for Aug 2025, 26-27 for Nov 2026)
     function getFinancialYear(dateStr) {
-        let dt = dateStr ? new Date(dateStr) : new Date();
-        if (isNaN(dt.getTime())) dt = new Date();
+        if (dateStr && typeof dateStr === 'string' && dateStr.includes('-')) {
+            const parts = dateStr.split('-');
+            if (parts.length >= 2) {
+                const y = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10);
+                if (!isNaN(y) && !isNaN(m)) {
+                    if (m >= 4) {
+                        const curY = String(y).slice(-2);
+                        const nextY = String(y + 1).slice(-2);
+                        return `${curY}-${nextY}`;
+                    } else {
+                        const prevY = String(y - 1).slice(-2);
+                        const curY = String(y).slice(-2);
+                        return `${prevY}-${curY}`;
+                    }
+                }
+            }
+        }
+        const dt = new Date();
         const y = dt.getFullYear();
-        const m = dt.getMonth() + 1; // 1 to 12
+        const m = dt.getMonth() + 1;
         if (m >= 4) {
-            const nextY = String(y + 1).slice(-2);
-            return `${y}-${nextY}`;
+            return `${String(y).slice(-2)}-${String(y + 1).slice(-2)}`;
         } else {
-            const prevY = y - 1;
-            const curY = String(y).slice(-2);
-            return `${prevY}-${curY}`;
+            return `${String(y - 1).slice(-2)}-${String(y).slice(-2)}`;
         }
     }
 
-    // Get default invoice prefix like "KAJ/2026-27/"
+    // Get default invoice prefix in format "25-26/KAJ/"
     function getDefaultInvoicePrefix(dateStr) {
         const issuerInput = document.getElementById('issuerName');
         const name = issuerInput ? issuerInput.value.trim() : '';
         const initials = getNameInitials(name || 'Kanaiyalal Jain');
         const fy = getFinancialYear(dateStr);
-        return `${initials}/${fy}/`;
+        return `${fy}/${initials}/`;
     }
 
     // Update the live format badge in Billed From section
@@ -1358,7 +1570,7 @@
         const badge = document.getElementById('namePrefixBadge');
         if (!badge) return;
         const prefix = getDefaultInvoicePrefix();
-        badge.textContent = `Format: ${prefix}XXX`;
+        badge.textContent = `Format: ${prefix}1`;
     }
 
     function handleIssuerNameInput() {
@@ -1366,7 +1578,7 @@
         saveAndRefresh();
     }
 
-    // Sync all existing invoices to match the current issuer name prefix
+    // Sync all existing invoices to match the current format e.g. 25-26/KAJ/1
     function syncAllInvoiceNumbersWithIssuer() {
         if (invoiceList.length === 0) {
             showToast('No invoices to update.');
@@ -1378,12 +1590,12 @@
 
         invoiceList.forEach((inv, index) => {
             const fy = getFinancialYear(inv.date);
-            const prefix = `${initials}/${fy}/`;
-            let seq = String(index + 1).padStart(3, '0');
+            const prefix = `${fy}/${initials}/`;
+            let seq = String(index + 1);
             if (inv.invoiceNo) {
                 const match = inv.invoiceNo.match(/(\d+)$/);
                 if (match) {
-                    seq = match[1];
+                    seq = String(parseInt(match[1], 10)); // unpadded integer (1, not 001)
                 }
             }
             inv.invoiceNo = `${prefix}${seq}`;
@@ -1391,13 +1603,13 @@
         });
 
         saveAndRefresh();
-        showToast(`Updated ${updatedCount} invoice(s) to ${initials}/... prefix`);
+        showToast(`Updated ${updatedCount} invoice(s) to ${initials} format`);
     }
 
-    // Smart invoice number calculator: increments or builds format e.g. KAJ/2026-27/001
+    // Smart invoice number calculator: increments or builds format e.g. 25-26/KAJ/1
     function getNextInvoiceNumber(forDate = null) {
         if (invoiceList.length === 0) {
-            return `${getDefaultInvoicePrefix(forDate)}001`;
+            return `${getDefaultInvoicePrefix(forDate)}1`;
         }
         const lastInv = invoiceList[invoiceList.length - 1];
         if (lastInv && lastInv.invoiceNo) {
@@ -1406,12 +1618,419 @@
                 const prefix = match[1];
                 const numStr = match[2];
                 const nextNum = parseInt(numStr, 10) + 1;
-                const paddedNextNum = String(nextNum).padStart(numStr.length, '0');
-                return `${prefix}${paddedNextNum}`;
+                return `${prefix}${nextNum}`;
             }
         }
-        const seqNum = String(invoiceList.length + 1).padStart(3, '0');
+        const seqNum = String(invoiceList.length + 1);
         return `${getDefaultInvoicePrefix(forDate)}${seqNum}`;
+    }
+
+    // --- BILLED FROM PARTIES (ISSUERS) MASTER & BACKUP/RESTORE ENGINE ---
+    const BILLED_FROM_STORAGE_KEY = 'redcoupons_billed_from_parties_v1';
+    let savedBilledFromList = [];
+
+    const DEFAULT_BILLED_FROM_PARTIES = [
+        {
+            id: 'bf_kaj',
+            name: 'Kanaiyalal Jain',
+            pan: 'KAJPJ1234F',
+            aadhar: '',
+            phone: '+91 98290 12345',
+            email: 'kanaiyalal.jain@example.com',
+            address: 'Ward No. 12, Main Market, Nokha, Bikaner, Rajasthan, 334803',
+            bankName: 'State Bank of India',
+            accNo: '38920194821',
+            ifsc: 'SBIN0004521'
+        },
+        {
+            id: 'bf_arj',
+            name: 'Arihantkumar Meghrajbhai Jain',
+            pan: '',
+            aadhar: '4321 8765 2109',
+            phone: '+91 98291 54321',
+            email: 'arihant.jain@example.com',
+            address: 'House No. 84, Mahaveer Colony, Nokha, Bikaner, Rajasthan, 334803',
+            bankName: 'State Bank of India',
+            accNo: '38920194821',
+            ifsc: 'SBIN0004521'
+        }
+    ];
+
+    function loadSavedBilledFromParties() {
+        try {
+            const raw = localStorage.getItem(BILLED_FROM_STORAGE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    savedBilledFromList = parsed;
+                } else {
+                    savedBilledFromList = [...DEFAULT_BILLED_FROM_PARTIES];
+                }
+            } else {
+                savedBilledFromList = [...DEFAULT_BILLED_FROM_PARTIES];
+                saveBilledFromToStorage(false);
+            }
+        } catch (e) {
+            console.warn('Failed to load saved Billed From parties:', e);
+            savedBilledFromList = [...DEFAULT_BILLED_FROM_PARTIES];
+        }
+        populateBilledFromDropdown();
+    }
+
+    function saveBilledFromToStorage(showNotification = true) {
+        try {
+            localStorage.setItem(BILLED_FROM_STORAGE_KEY, JSON.stringify(savedBilledFromList));
+            populateBilledFromDropdown();
+            renderBilledFromTable();
+            if (showNotification) {
+                showToast(`Saved ${savedBilledFromList.length} Billed From profile(s)`);
+            }
+        } catch (e) {
+            console.error('Failed to save Billed From profiles:', e);
+            showToast('Error saving profile to local storage');
+        }
+    }
+
+    function populateBilledFromDropdown() {
+        const select = document.getElementById('savedBilledFromSelect');
+        if (!select) return;
+        const currentName = (document.getElementById('issuerName') ? document.getElementById('issuerName').value.trim() : '').toLowerCase();
+
+        select.innerHTML = '<option value="">-- Choose from saved Billed From parties (' + savedBilledFromList.length + ') --</option>';
+        savedBilledFromList.forEach(party => {
+            const opt = document.createElement('option');
+            opt.value = party.id;
+            const taxId = party.pan ? `PAN: ${party.pan}` : (party.aadhar ? `Aadhaar: ${party.aadhar}` : '');
+            opt.textContent = party.name + (taxId ? ` (${taxId})` : '');
+            if (party.name.trim().toLowerCase() === currentName) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        });
+    }
+
+    function applyBilledFromProfile(partyId) {
+        if (!partyId) return;
+        const party = savedBilledFromList.find(p => p.id === partyId);
+        if (!party) return;
+
+        if (document.getElementById('issuerName')) document.getElementById('issuerName').value = party.name || '';
+        if (document.getElementById('issuerPan')) document.getElementById('issuerPan').value = (party.pan || '').toUpperCase();
+        if (document.getElementById('issuerAadhar')) document.getElementById('issuerAadhar').value = party.aadhar || '';
+        if (document.getElementById('issuerPhone')) document.getElementById('issuerPhone').value = party.phone || '';
+        if (document.getElementById('issuerEmail')) document.getElementById('issuerEmail').value = party.email || '';
+        if (document.getElementById('issuerAddress')) document.getElementById('issuerAddress').value = party.address || '';
+        if (document.getElementById('bankName')) document.getElementById('bankName').value = party.bankName || '';
+        if (document.getElementById('accNo')) document.getElementById('accNo').value = party.accNo || '';
+        if (document.getElementById('ifsc')) document.getElementById('ifsc').value = (party.ifsc || '').toUpperCase();
+
+        updateIssuerNameBadge();
+        syncAllInvoiceNumbersWithIssuer();
+        saveAndRefresh();
+        showToast(`Loaded profile: "${party.name}"`);
+    }
+
+    function saveCurrentBilledFromParty() {
+        const name = (document.getElementById('issuerName') ? document.getElementById('issuerName').value.trim() : '');
+        if (!name) {
+            showToast('Please enter an Issuer Name before saving.');
+            return;
+        }
+
+        const pan = document.getElementById('issuerPan') ? document.getElementById('issuerPan').value.trim().toUpperCase() : '';
+        const aadhar = document.getElementById('issuerAadhar') ? document.getElementById('issuerAadhar').value.trim() : '';
+        const phone = document.getElementById('issuerPhone') ? document.getElementById('issuerPhone').value.trim() : '';
+        const email = document.getElementById('issuerEmail') ? document.getElementById('issuerEmail').value.trim() : '';
+        const address = document.getElementById('issuerAddress') ? document.getElementById('issuerAddress').value.trim() : '';
+        const bankName = document.getElementById('bankName') ? document.getElementById('bankName').value.trim() : '';
+        const accNo = document.getElementById('accNo') ? document.getElementById('accNo').value.trim() : '';
+        const ifsc = document.getElementById('ifsc') ? document.getElementById('ifsc').value.trim().toUpperCase() : '';
+
+        const existingIndex = savedBilledFromList.findIndex(p => p.name.trim().toLowerCase() === name.toLowerCase());
+
+        if (existingIndex >= 0) {
+            savedBilledFromList[existingIndex].pan = pan;
+            savedBilledFromList[existingIndex].aadhar = aadhar;
+            savedBilledFromList[existingIndex].phone = phone;
+            savedBilledFromList[existingIndex].email = email;
+            savedBilledFromList[existingIndex].address = address;
+            savedBilledFromList[existingIndex].bankName = bankName;
+            savedBilledFromList[existingIndex].accNo = accNo;
+            savedBilledFromList[existingIndex].ifsc = ifsc;
+            saveBilledFromToStorage(false);
+            showToast(`Updated Billed From profile "${name}"`);
+        } else {
+            const newParty = {
+                id: 'bf_' + Date.now(),
+                name: name,
+                pan: pan,
+                aadhar: aadhar,
+                phone: phone,
+                email: email,
+                address: address,
+                bankName: bankName,
+                accNo: accNo,
+                ifsc: ifsc
+            };
+            savedBilledFromList.push(newParty);
+            saveBilledFromToStorage(false);
+            showToast(`Saved new Billed From profile "${name}"`);
+        }
+        populateBilledFromDropdown();
+    }
+
+    function openBilledFromModal() {
+        const modal = document.getElementById('billedFromModal');
+        if (modal) {
+            cancelBilledFromForm();
+            renderBilledFromTable();
+            modal.showModal();
+        }
+    }
+
+    function closeBilledFromModal() {
+        const modal = document.getElementById('billedFromModal');
+        if (modal) modal.close();
+    }
+
+    function renderBilledFromTable() {
+        const tbody = document.getElementById('billedFromTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (savedBilledFromList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:15px; color:#64748b;">No saved Billed From profiles yet. Click "Add New Profile" or "Import JSON".</td></tr>`;
+            return;
+        }
+
+        savedBilledFromList.forEach((party) => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #e2e8f0';
+            const taxId = party.pan ? `PAN: <strong>${escapeHtml(party.pan)}</strong>` : (party.aadhar ? `Aadhaar: <strong>${escapeHtml(party.aadhar)}</strong>` : '—');
+            tr.innerHTML = `
+                <td style="padding: 8px 10px; vertical-align: top;">
+                    <div style="font-weight: 600; color: #0f172a;">${escapeHtml(party.name)}</div>
+                    <div style="font-size: 11px; color: #64748b; white-space: pre-line; max-height: 36px; overflow: hidden;">${escapeHtml(party.address || '')}</div>
+                </td>
+                <td style="padding: 8px 10px; vertical-align: top; color: #334155; font-size: 11.5px;">
+                    <div>${taxId}</div>
+                    ${party.phone ? `<div style="font-size: 10.5px; color: #64748b;">📞 ${escapeHtml(party.phone)}</div>` : ''}
+                </td>
+                <td style="padding: 8px 10px; vertical-align: top; color: #334155; font-size: 11.5px;">
+                    <div>${escapeHtml(party.bankName || '—')}</div>
+                    <div style="font-size: 11px; color: #64748b;">A/C: ${escapeHtml(party.accNo || '—')}</div>
+                    <div style="font-weight: 700; font-family: monospace;">IFSC: ${escapeHtml(party.ifsc || '—')}</div>
+                </td>
+                <td style="padding: 8px 10px; text-align: center; vertical-align: middle; white-space: nowrap;">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="applyBilledFromProfile('${party.id}'); closeBilledFromModal();" style="font-size: 11px; padding: 2px 6px;" title="Apply this profile">
+                        Select
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="showAddBilledFromForm('${party.id}')" style="font-size: 11px; padding: 2px 6px;" title="Edit profile">
+                        ✏️
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteBilledFromParty('${party.id}')" style="font-size: 11px; padding: 2px 6px;" title="Delete profile">
+                        ✕
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function showAddBilledFromForm(partyIdToEdit = null) {
+        const container = document.getElementById('billedFromFormContainer');
+        const title = document.getElementById('billedFromFormTitle');
+        const idField = document.getElementById('editBilledFromId');
+        const nameField = document.getElementById('bfFormName');
+        const panField = document.getElementById('bfFormPan');
+        const aadharField = document.getElementById('bfFormAadhar');
+        const phoneField = document.getElementById('bfFormPhone');
+        const emailField = document.getElementById('bfFormEmail');
+        const addrField = document.getElementById('bfFormAddress');
+        const bankField = document.getElementById('bfFormBankName');
+        const accField = document.getElementById('bfFormAccNo');
+        const ifscField = document.getElementById('bfFormIfsc');
+
+        if (!container) return;
+
+        if (partyIdToEdit) {
+            const party = savedBilledFromList.find(p => p.id === partyIdToEdit);
+            if (!party) return;
+            title.textContent = 'Edit Profile: ' + party.name;
+            idField.value = party.id;
+            nameField.value = party.name || '';
+            panField.value = (party.pan || '').toUpperCase();
+            aadharField.value = party.aadhar || '';
+            phoneField.value = party.phone || '';
+            emailField.value = party.email || '';
+            addrField.value = party.address || '';
+            bankField.value = party.bankName || '';
+            accField.value = party.accNo || '';
+            ifscField.value = (party.ifsc || '').toUpperCase();
+        } else {
+            title.textContent = 'Add New Billed From Profile';
+            idField.value = '';
+            nameField.value = '';
+            panField.value = '';
+            aadharField.value = '';
+            phoneField.value = '';
+            emailField.value = '';
+            addrField.value = '';
+            bankField.value = 'State Bank of India';
+            accField.value = '';
+            ifscField.value = '';
+        }
+        container.style.display = 'block';
+        nameField.focus();
+    }
+
+    function cancelBilledFromForm() {
+        const container = document.getElementById('billedFromFormContainer');
+        if (container) container.style.display = 'none';
+    }
+
+    function saveBilledFromFromForm() {
+        const id = document.getElementById('editBilledFromId').value;
+        const name = document.getElementById('bfFormName').value.trim();
+        const pan = document.getElementById('bfFormPan').value.trim().toUpperCase();
+        const aadhar = document.getElementById('bfFormAadhar').value.trim();
+        const phone = document.getElementById('bfFormPhone').value.trim();
+        const email = document.getElementById('bfFormEmail').value.trim();
+        const address = document.getElementById('bfFormAddress').value.trim();
+        const bankName = document.getElementById('bfFormBankName').value.trim();
+        const accNo = document.getElementById('bfFormAccNo').value.trim();
+        const ifsc = document.getElementById('bfFormIfsc').value.trim().toUpperCase();
+
+        if (!name) {
+            alert('Please enter a profile / issuer name.');
+            return;
+        }
+
+        if (id) {
+            const party = savedBilledFromList.find(p => p.id === id);
+            if (party) {
+                party.name = name;
+                party.pan = pan;
+                party.aadhar = aadhar;
+                party.phone = phone;
+                party.email = email;
+                party.address = address;
+                party.bankName = bankName;
+                party.accNo = accNo;
+                party.ifsc = ifsc;
+                showToast(`Profile "${name}" updated`);
+            }
+        } else {
+            savedBilledFromList.push({
+                id: 'bf_' + Date.now(),
+                name: name,
+                pan: pan,
+                aadhar: aadhar,
+                phone: phone,
+                email: email,
+                address: address,
+                bankName: bankName,
+                accNo: accNo,
+                ifsc: ifsc
+            });
+            showToast(`Profile "${name}" added`);
+        }
+
+        saveBilledFromToStorage(false);
+        cancelBilledFromForm();
+        renderBilledFromTable();
+    }
+
+    function deleteBilledFromParty(partyId) {
+        const party = savedBilledFromList.find(p => p.id === partyId);
+        const name = party ? party.name : 'this profile';
+        if (confirm(`Are you sure you want to delete profile "${name}"?`)) {
+            savedBilledFromList = savedBilledFromList.filter(p => p.id !== partyId);
+            saveBilledFromToStorage(false);
+            renderBilledFromTable();
+            showToast(`Profile deleted`);
+        }
+    }
+
+    function exportBilledFromJSON() {
+        if (savedBilledFromList.length === 0) {
+            showToast('No saved Billed From profiles to export.');
+            return;
+        }
+        const jsonStr = JSON.stringify(savedBilledFromList, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const dateStr = new Date().toISOString().split('T')[0];
+        a.download = `billed_from_parties_master_${dateStr}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(`Exported ${savedBilledFromList.length} Billed From profile(s) (Backup)`);
+    }
+
+    function importBilledFromJSON(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                let data = JSON.parse(e.target.result);
+                if (data && !Array.isArray(data) && Array.isArray(data.parties)) {
+                    data = data.parties;
+                }
+                if (!Array.isArray(data)) {
+                    alert('Invalid JSON: expected an array of Billed From profiles.');
+                    return;
+                }
+
+                let importedCount = 0;
+                let updatedCount = 0;
+
+                data.forEach(item => {
+                    if (item && item.name && typeof item.name === 'string') {
+                        const existing = savedBilledFromList.find(p => p.name.trim().toLowerCase() === item.name.trim().toLowerCase());
+                        if (existing) {
+                            existing.pan = (item.pan || existing.pan || '').toUpperCase();
+                            existing.aadhar = item.aadhar || existing.aadhar || '';
+                            existing.phone = item.phone || existing.phone || '';
+                            existing.email = item.email || existing.email || '';
+                            existing.address = item.address || existing.address || '';
+                            existing.bankName = item.bankName || existing.bankName || '';
+                            existing.accNo = item.accNo || existing.accNo || '';
+                            existing.ifsc = (item.ifsc || existing.ifsc || '').toUpperCase();
+                            updatedCount++;
+                        } else {
+                            savedBilledFromList.push({
+                                id: item.id || ('bf_' + Date.now() + '_' + Math.floor(Math.random() * 1000)),
+                                name: item.name.trim(),
+                                pan: (item.pan || '').toUpperCase(),
+                                aadhar: item.aadhar || '',
+                                phone: item.phone || '',
+                                email: item.email || '',
+                                address: item.address || '',
+                                bankName: item.bankName || '',
+                                accNo: item.accNo || '',
+                                ifsc: (item.ifsc || '').toUpperCase()
+                            });
+                            importedCount++;
+                        }
+                    }
+                });
+
+                saveBilledFromToStorage(false);
+                renderBilledFromTable();
+                showToast(`Restored ${importedCount} new, updated ${updatedCount} Billed From profile(s)!`);
+            } catch (err) {
+                console.error(err);
+                alert('Error parsing JSON backup file. Please make sure it is a valid JSON file.');
+            }
+            event.target.value = '';
+        };
+        reader.readAsText(file);
     }
 
     // --- DATE CALCULATIONS & PLACEHOLDER REPLACER ENGINE ---
@@ -1630,14 +2249,145 @@
         showToast('Invoice duplicated');
     }
 
+    // --- HYBRID DATE INPUT & SELECTION ENGINE ---
+    function parseUserDateInput(inputStr) {
+        if (!inputStr) return '';
+        inputStr = inputStr.trim();
+        if (!inputStr) return '';
+
+        // YYYY-MM-DD
+        if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(inputStr)) {
+            const parts = inputStr.split('-');
+            const y = parseInt(parts[0], 10);
+            const m = String(parseInt(parts[1], 10)).padStart(2, '0');
+            const d = String(parseInt(parts[2], 10)).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        // DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY
+        const dmyMatch = inputStr.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
+        if (dmyMatch) {
+            let d = parseInt(dmyMatch[1], 10);
+            let m = parseInt(dmyMatch[2], 10);
+            let y = parseInt(dmyMatch[3], 10);
+            if (y < 100) y += 2000;
+            if (m >= 1 && m <= 12 && d >= 1 && d <= 31) {
+                return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            }
+        }
+
+        // DD Mon YYYY e.g. 15 Nov 2025
+        const monthNames = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+        const monMatch = inputStr.match(/^(\d{1,2})\s+([a-zA-Z]{3,9})\s+(\d{2,4})$/);
+        if (monMatch) {
+            let d = parseInt(monMatch[1], 10);
+            let monStr = monMatch[2].toLowerCase().substring(0, 3);
+            let y = parseInt(monMatch[3], 10);
+            if (y < 100) y += 2000;
+            let m = monthNames[monStr];
+            if (m && d >= 1 && d <= 31) {
+                return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            }
+        }
+
+        const parsed = new Date(inputStr);
+        if (!isNaN(parsed.getTime())) {
+            const y = parsed.getFullYear();
+            const m = String(parsed.getMonth() + 1).padStart(2, '0');
+            const d = String(parsed.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+        return '';
+    }
+
+    function handleDateTextCommit(id, textVal, inputEl) {
+        const inv = invoiceList.find(i => i.id === id);
+        if (!inv) return;
+
+        const currentDateFormat = document.getElementById('dateFormatSelect') ? document.getElementById('dateFormatSelect').value : 'DD/MM/YYYY';
+        const parsedIso = parseUserDateInput(textVal);
+
+        if (parsedIso) {
+            inv.date = parsedIso;
+            if (inputEl) inputEl.value = formatCustomDate(parsedIso, currentDateFormat);
+            const nativePicker = document.getElementById(`date_native_${id}`);
+            if (nativePicker) nativePicker.value = parsedIso;
+        } else {
+            if (inputEl && inv.date) {
+                inputEl.value = formatCustomDate(inv.date, currentDateFormat);
+            }
+        }
+
+        saveState();
+        updateStats();
+        updateAllRowPreviews();
+        renderScreenPreview();
+    }
+
+    function handleDateNativeCommit(id, isoVal) {
+        if (!isoVal) return;
+        const inv = invoiceList.find(i => i.id === id);
+        if (!inv) return;
+
+        inv.date = isoVal;
+        const currentDateFormat = document.getElementById('dateFormatSelect') ? document.getElementById('dateFormatSelect').value : 'DD/MM/YYYY';
+        const textInput = document.getElementById(`date_text_${id}`);
+        if (textInput) {
+            textInput.value = formatCustomDate(isoVal, currentDateFormat);
+        }
+
+        saveState();
+        updateStats();
+        updateAllRowPreviews();
+        renderScreenPreview();
+    }
+
+    function triggerRowDatePicker(id) {
+        const picker = document.getElementById(`date_native_${id}`);
+        if (!picker) return;
+        try {
+            if (typeof picker.showPicker === 'function') {
+                picker.showPicker();
+            } else {
+                picker.focus();
+                picker.click();
+            }
+        } catch (e) {
+            picker.focus();
+            picker.click();
+        }
+    }
+
+    function updateRowResolvedSubtext(id) {
+        const inv = invoiceList.find(i => i.id === id);
+        if (!inv) return;
+        const currentDateFormat = document.getElementById('dateFormatSelect') ? document.getElementById('dateFormatSelect').value : 'DD/MM/YYYY';
+        const initialFallback = document.getElementById('initialDateFallback') ? document.getElementById('initialDateFallback').value : '';
+        const resolved = replaceDatePlaceholders(inv.optionalLine || '', inv, invoiceList, currentDateFormat, initialFallback);
+        const container = document.getElementById(`resolved_preview_${inv.id}`);
+        if (container) {
+            if (resolved) {
+                container.innerHTML = `🔍 <strong>Resolved:</strong> ${escapeHtml(resolved)}`;
+                container.style.display = 'inline-block';
+            } else {
+                container.innerHTML = '';
+                container.style.display = 'none';
+            }
+        }
+    }
+
+    function updateAllRowPreviews() {
+        invoiceList.forEach(inv => updateRowResolvedSubtext(inv.id));
+    }
+
     function updateInvoiceField(id, field, value) {
         const item = invoiceList.find(i => i.id === id);
         if (item) {
             item[field] = value;
             saveState();
             updateStats();
-            if (field === 'date' || field === 'optionalLine') {
-                renderTable();
+            if (field === 'optionalLine') {
+                updateRowResolvedSubtext(id);
             }
             renderScreenPreview();
         }
@@ -1737,6 +2487,42 @@
     }
 
     // --- QUICK BATCH GENERATOR MODAL ---
+    function commitBatchStartDate(textVal) {
+        const parsed = parseUserDateInput(textVal);
+        const currentDateFormat = document.getElementById('dateFormatSelect') ? document.getElementById('dateFormatSelect').value : 'DD/MM/YYYY';
+        if (parsed) {
+            document.getElementById('batchStartDate').value = parsed;
+            document.getElementById('batchStartDateText').value = formatCustomDate(parsed, currentDateFormat);
+        } else {
+            const cur = document.getElementById('batchStartDate').value;
+            if (cur) document.getElementById('batchStartDateText').value = formatCustomDate(cur, currentDateFormat);
+        }
+        updateBatchPrefixFromDate();
+    }
+
+    function pickedBatchStartDate(isoVal) {
+        if (!isoVal) return;
+        const currentDateFormat = document.getElementById('dateFormatSelect') ? document.getElementById('dateFormatSelect').value : 'DD/MM/YYYY';
+        document.getElementById('batchStartDateText').value = formatCustomDate(isoVal, currentDateFormat);
+        updateBatchPrefixFromDate();
+    }
+
+    function triggerBatchDatePicker() {
+        const picker = document.getElementById('batchStartDate');
+        if (!picker) return;
+        try {
+            if (typeof picker.showPicker === 'function') {
+                picker.showPicker();
+            } else {
+                picker.focus();
+                picker.click();
+            }
+        } catch (e) {
+            picker.focus();
+            picker.click();
+        }
+    }
+
     function updateBatchPrefixFromDate() {
         const dateVal = document.getElementById('batchStartDate').value;
         const prefix = getDefaultInvoicePrefix(dateVal);
@@ -1744,6 +2530,12 @@
     }
 
     function showQuickAddModal() {
+        const currentDateFormat = document.getElementById('dateFormatSelect') ? document.getElementById('dateFormatSelect').value : 'DD/MM/YYYY';
+        const cur = document.getElementById('batchStartDate').value || new Date().toISOString().split('T')[0];
+        document.getElementById('batchStartDate').value = cur;
+        if (document.getElementById('batchStartDateText')) {
+            document.getElementById('batchStartDateText').value = formatCustomDate(cur, currentDateFormat);
+        }
         updateBatchPrefixFromDate();
         const modal = document.getElementById('batchModal');
         if (modal) modal.showModal();
@@ -1763,7 +2555,7 @@
         for (let i = 0; i < count; i++) {
             const nextId = 'inv_' + Date.now() + '_' + i + '_' + Math.floor(Math.random() * 100);
             const dateStr = curDate.toISOString().split('T')[0];
-            const invNo = `${prefix}${String(invoiceList.length + 1).padStart(3, '0')}`;
+            const invNo = `${prefix}${invoiceList.length + 1}`;
 
             invoiceList.push({
                 id: nextId,
@@ -1793,6 +2585,7 @@
         const tbody = document.getElementById('invoicesTableBody');
         const emptyPrompt = document.getElementById('noInvoicesPrompt');
         const table = document.getElementById('invoicesTable');
+        const currentDateFormat = document.getElementById('dateFormatSelect') ? document.getElementById('dateFormatSelect').value : 'DD/MM/YYYY';
 
         if (!tbody) return;
         tbody.innerHTML = '';
@@ -1810,25 +2603,49 @@
         invoiceList.forEach((inv, index) => {
             const tr = document.createElement('tr');
             
-            const resolvedPreview = replaceDatePlaceholders(inv.optionalLine || '', inv, invoiceList);
-            const previewHTML = resolvedPreview ? `<div class="resolved-subtext">🔍 <strong>Resolved:</strong> ${escapeHtml(resolvedPreview)}</div>` : '';
+            const resolvedPreview = replaceDatePlaceholders(inv.optionalLine || '', inv, invoiceList, currentDateFormat);
 
             tr.innerHTML = `
                 <td style="text-align: center;">
                     <input type="checkbox" ${inv.selected ? 'checked' : ''} onchange="toggleRowSelection('${inv.id}', this)">
                 </td>
                 <td style="min-width: 185px;">
-                    <input type="text" class="inv-no-input" value="${escapeHtml(inv.invoiceNo || '')}" placeholder="KAJ/2026-27/001" onfocus="this.select()" onchange="updateInvoiceField('${inv.id}', 'invoiceNo', this.value)">
+                    <input type="text" class="inv-no-input" value="${escapeHtml(inv.invoiceNo || '')}" placeholder="25-26/KAJ/1" onfocus="this.select()" onchange="updateInvoiceField('${inv.id}', 'invoiceNo', this.value)">
                 </td>
-                <td>
-                    <input type="date" value="${inv.date || ''}" onchange="updateInvoiceField('${inv.id}', 'date', this.value)">
+                <td style="min-width: 145px;">
+                    <div class="date-input-container">
+                        <input type="text" 
+                               id="date_text_${inv.id}" 
+                               class="date-keyboard-input" 
+                               value="${formatCustomDate(inv.date, currentDateFormat)}" 
+                               placeholder="${currentDateFormat}" 
+                               title="Type date (e.g. 15/11/2025, 15-11-2025, 2025-11-15) or click calendar"
+                               onfocus="this.select()"
+                               onchange="handleDateTextCommit('${inv.id}', this.value, this)"
+                               onblur="handleDateTextCommit('${inv.id}', this.value, this)"
+                               onkeydown="if(event.key==='Enter'){this.blur();}">
+                        <button type="button" 
+                                class="date-cal-btn" 
+                                onclick="triggerRowDatePicker('${inv.id}')" 
+                                title="Open calendar date picker">
+                            📅
+                        </button>
+                        <input type="date" 
+                               id="date_native_${inv.id}" 
+                               class="date-hidden-picker" 
+                               value="${inv.date || ''}" 
+                               tabindex="-1"
+                               onchange="handleDateNativeCommit('${inv.id}', this.value)">
+                    </div>
                 </td>
                 <td>
                     <input type="number" value="${inv.amount !== undefined ? inv.amount : ''}" placeholder="0.00" step="0.01" onchange="updateInvoiceField('${inv.id}', 'amount', parseFloat(this.value) || 0)">
                 </td>
                 <td>
-                    <input type="text" id="input_opt_${inv.id}" value="${escapeHtml(inv.optionalLine || '')}" placeholder="e.g. Services from {{Last_billing_date}} to {{billing_date}}" onfocus="lastActiveOptionalInput = this" onchange="updateInvoiceField('${inv.id}', 'optionalLine', this.value)">
-                    ${previewHTML}
+                    <input type="text" id="input_opt_${inv.id}" value="${escapeHtml(inv.optionalLine || '')}" placeholder="e.g. Services from {{Last_billing_date}} to {{billing_date}}" onfocus="lastActiveOptionalInput = this" oninput="updateInvoiceField('${inv.id}', 'optionalLine', this.value)" onchange="updateInvoiceField('${inv.id}', 'optionalLine', this.value)">
+                    <div id="resolved_preview_${inv.id}" class="resolved-subtext" style="${resolvedPreview ? '' : 'display:none;'}">
+                        ${resolvedPreview ? `🔍 <strong>Resolved:</strong> ${escapeHtml(resolvedPreview)}` : ''}
+                    </div>
                 </td>
                 <td style="text-align: center; white-space: nowrap;">
                     <button class="btn btn-primary btn-sm" title="Print this single invoice" onclick="printSingleInvoice('${inv.id}')" style="padding: 4px 7px;">
@@ -1883,7 +2700,7 @@
 
         const bankName = document.getElementById('bankName').value.trim() || '_______________________';
         const accNo = document.getElementById('accNo').value.trim() || '_______________________';
-        const ifsc = document.getElementById('ifsc').value.trim() || '_________________';
+        const ifsc = (document.getElementById('ifsc').value.trim() || '_________________').toUpperCase();
 
         const clientName = document.getElementById('clientName').value.trim() || 'Redcoupons Private Limited';
         const clientAddress = document.getElementById('clientAddress').value.trim() || 'Ward No. 29, Pani Tanki Ke Pass, Nokha,\nBikaner, Nokha, Rajasthan, India, 334803';
@@ -2076,7 +2893,7 @@
                             <div class="clean-footer-tag">Payment Information</div>
                             <div class="clean-bank-line"><span class="lbl">Bank Name:</span> <strong>${escapeHtml(bankName)}</strong></div>
                             <div class="clean-bank-line"><span class="lbl">Account No:</span> <strong>${escapeHtml(accNo)}</strong></div>
-                            <div class="clean-bank-line"><span class="lbl">IFSC Code:</span> <strong>${escapeHtml(ifsc)}</strong></div>
+                            <div class="clean-bank-line"><span class="lbl">IFSC Code:</span> <strong class="clean-ifsc-code" style="font-weight: 800; font-family: monospace, inherit; letter-spacing: 0.5px; text-transform: uppercase;">${escapeHtml(ifsc)}</strong></div>
                         </div>
 
                         <!-- Authorized Signatory (Centered with respect to itself) -->
@@ -2171,7 +2988,7 @@
     }
 
     // --- LOCAL STORAGE PERSISTENCE ---
-    const STORAGE_KEY = 'redcoupons_multi_invoice_state_v6';
+    const STORAGE_KEY = 'redcoupons_multi_invoice_state_v7';
 
     function saveState() {
         const state = {
@@ -2207,7 +3024,10 @@
 
     function loadSavedData() {
         try {
-            const raw = localStorage.getItem(STORAGE_KEY);
+            let raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) {
+                raw = localStorage.getItem('redcoupons_multi_invoice_state_v6');
+            }
             if (!raw) return;
             const state = JSON.parse(raw);
             if (state.issuerName !== undefined) document.getElementById('issuerName').value = state.issuerName;
@@ -2218,7 +3038,7 @@
             if (state.issuerAddress !== undefined) document.getElementById('issuerAddress').value = state.issuerAddress;
             if (state.bankName !== undefined) document.getElementById('bankName').value = state.bankName;
             if (state.accNo !== undefined) document.getElementById('accNo').value = state.accNo;
-            if (state.ifsc !== undefined) document.getElementById('ifsc').value = state.ifsc;
+            if (state.ifsc !== undefined) document.getElementById('ifsc').value = (state.ifsc || '').toUpperCase();
             if (state.clientName !== undefined) document.getElementById('clientName').value = state.clientName;
             if (state.clientAddress !== undefined) document.getElementById('clientAddress').value = state.clientAddress;
             if (state.clientCin !== undefined) document.getElementById('clientCin').value = state.clientCin;
@@ -2253,6 +3073,7 @@
 
         saveState();
         updateIssuerNameBadge();
+        populateBilledFromDropdown();
         renderTable();
         renderScreenPreview();
     }
@@ -2293,34 +3114,34 @@
 
         document.getElementById('headerLayoutSelect').value = 'clean';
         document.getElementById('dateFormatSelect').value = 'DD/MM/YYYY';
-        document.getElementById('initialDateFallback').value = '2026-08-01';
+        document.getElementById('initialDateFallback').value = '2025-08-01';
         document.getElementById('globalTemplateInput').value = 'Services rendered from {{Last_billing_date}} to {{billing_date}}';
         if (document.getElementById('invoiceDocTitle')) document.getElementById('invoiceDocTitle').value = 'INVOICE';
 
-        const prefix = isArihant ? 'ARJ/2026-27/' : 'KAJ/2026-27/';
+        const initials = isArihant ? 'ARJ' : 'KAJ';
 
         invoiceList = [
             {
                 id: 'inv_sample_1',
                 selected: true,
-                invoiceNo: `${prefix}001`,
-                date: '2026-08-31',
+                invoiceNo: `25-26/${initials}/1`,
+                date: '2025-08-31',
                 amount: 18500,
                 optionalLine: 'Services rendered from {{Last_billing_date}} to {{billing_date}}'
             },
             {
                 id: 'inv_sample_2',
                 selected: true,
-                invoiceNo: `${prefix}002`,
-                date: '2026-09-30',
+                invoiceNo: `25-26/${initials}/2`,
+                date: '2025-09-30',
                 amount: 18500,
-                optionalLine: 'Services rendered from {{Last_billing_date}} to {{before_billing}}'
+                optionalLine: 'Services rendered for {{previous_month}} ({{previous_m_date}})'
             },
             {
                 id: 'inv_sample_3',
                 selected: true,
-                invoiceNo: `${prefix}003`,
-                date: '2026-10-31',
+                invoiceNo: `25-26/${initials}/3`,
+                date: '2025-10-31',
                 amount: 21000,
                 optionalLine: 'Billing cycle: {{Last_billing_date}} to {{billing_date}} (Includes extra administrative support)'
             }
@@ -2333,6 +3154,7 @@
     function resetAllData() {
         if (!confirm('Are you sure you want to clear all data and start fresh?')) return;
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem('redcoupons_multi_invoice_state_v6');
         document.getElementById('issuerName').value = '';
         document.getElementById('issuerPan').value = '';
         if (document.getElementById('issuerAadhar')) document.getElementById('issuerAadhar').value = '';
