@@ -148,7 +148,7 @@
 
         .grid-layout {
             display: grid;
-            grid-template-columns: 380px 1fr;
+            grid-template-columns: 390px 1fr;
             gap: 20px;
             align-items: start;
         }
@@ -346,10 +346,10 @@
             margin: 0;
         }
 
-        /* Spacious Invoice Number Input so long strings like ASS/2026-27/001 are 100% visible */
+        /* Spacious Invoice Number Input so full strings like KAJ/2026-27/001 are 100% visible */
         .inv-no-input {
             width: 100% !important;
-            min-width: 175px !important;
+            min-width: 180px !important;
             font-family: inherit;
             font-size: 13px !important;
             font-weight: 600 !important;
@@ -462,221 +462,364 @@
             font-weight: 600;
         }
 
-        /* ==============================================================
-           --- ACCURATE INVOICE TEMPLATE STYLES (Used in Preview & Print) ---
-           ============================================================== */
-        .invoice-content {
+        /* =========================================================================
+           --- CLEAN & MINIMALIST PROFESSIONAL INVOICE STYLING (NO BOXY BORDERS) ---
+           ========================================================================= */
+        .clean-invoice-page, .invoice-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100%;
+            height: 100%;
+            color: #111827;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
+            background: #ffffff;
+            box-sizing: border-box;
+        }
+
+        .clean-invoice-content, .invoice-content {
             display: flex;
             flex-direction: column;
             height: 100%;
             flex: 1;
-        }
-
-        .invoice-header {
-            display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-            border-bottom: 2px solid #222;
-            padding-bottom: 12px;
         }
 
-        .invoice-title {
-            font-size: 2.3em;
+        /* Top Issuer Letterhead */
+        .clean-header {
+            text-align: center;
+            padding-bottom: 2px;
+        }
+
+        .clean-doc-title {
+            font-size: 18px;
             font-weight: 800;
-            letter-spacing: 2px;
+            letter-spacing: 2.5px;
             text-transform: uppercase;
-            color: #222;
-            margin: 0;
-            line-height: 1;
+            color: #111827;
+            margin: 0 0 6px 0;
         }
 
-        .header-meta {
-            text-align: right;
-            font-size: 13.5px;
-            color: #222;
-        }
-
-        .dotted-line {
-            display: inline-block;
-            border-bottom: 1px dashed #777;
-            min-width: 140px;
-            margin-left: 5px;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .date-display {
-            display: inline-block;
-            font-weight: 600;
-            min-width: 120px;
-            text-align: right;
-        }
-
-        .date-part {
-            display: inline-block;
-            border-bottom: 1px dashed #777;
-            width: 28px;
-            margin: 0 2px;
-            text-align: center;
-            font-weight: 600;
-        }
-        .date-part-short {
-            display: inline-block;
-            border-bottom: 1px dashed #777;
-            width: 25px;
-            margin-left: 1px;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        /* Details Section */
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
-            gap: 25px;
-            margin-bottom: 22px;
-            font-size: 13.5px;
-            line-height: 1.55;
-        }
-
-        .info-block h4 {
-            margin: 0 0 5px 0;
-            color: #666;
-            text-transform: uppercase;
-            font-size: 11px;
-            letter-spacing: 1px;
+        .clean-issuer-name {
+            font-size: 21px;
             font-weight: 700;
-        }
-
-        .info-line {
-            margin-bottom: 2px;
-            word-break: break-word;
-        }
-
-        /* Table */
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 18px;
-            font-size: 13px;
-        }
-
-        .items-table th {
-            background-color: #f8f9fa;
-            color: #222;
-            text-transform: uppercase;
-            font-size: 11.5px;
             letter-spacing: 0.5px;
-            padding: 10px 12px;
-            border-top: 2px solid #222;
-            border-bottom: 2px solid #222;
-            text-align: left;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            text-transform: uppercase;
+            color: #111827;
+            margin: 0 0 4px 0;
+            line-height: 1.25;
         }
 
-        .items-table th.center { text-align: center; }
-        .items-table th.right { text-align: right; }
-
-        .items-table td {
-            padding: 12px 12px;
-            border-bottom: 1px solid #e0e0e0;
-            vertical-align: top;
-        }
-
-        .items-table td.center { text-align: center; }
-        .items-table td.right { text-align: right; }
-
-        .activity-title {
-            font-weight: 700;
-            font-size: 13.5px;
-            color: #111;
+        .clean-issuer-addr {
+            font-size: 12px;
+            color: #4b5563;
+            line-height: 1.45;
             margin-bottom: 4px;
         }
 
-        .activity-desc {
-            font-size: 12.5px;
-            color: #444;
+        .clean-issuer-meta {
+            font-size: 11.5px;
+            color: #374151;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .clean-header-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 12px 0 16px 0;
+        }
+
+        /* Sub-Grid: Billed To (Left) & Invoice Meta (Right) - Zero Clumsy Boxes */
+        .clean-sub-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            gap: 24px;
+        }
+
+        .clean-billed-to {
+            flex: 1.2;
+        }
+
+        .clean-section-tag {
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .clean-party-name {
+            font-size: 14.5px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 2px;
+        }
+
+        .clean-party-addr {
+            font-size: 12px;
+            color: #4b5563;
             line-height: 1.45;
         }
 
-        .activity-extra-line {
-            margin-top: 6px;
-            font-size: 12.5px;
-            color: #1e3a8a;
+        .clean-party-cin {
+            font-size: 11.5px;
+            color: #111827;
             font-weight: 600;
-            background: #eff6ff;
-            padding: 3px 6px;
-            border-radius: 3px;
-            display: inline-block;
+            margin-top: 3px;
         }
 
-        .empty-row td {
-            height: 28px;
-            padding: 6px 12px;
-        }
-
-        /* Footer Totals Section */
-        .items-table tfoot th, .items-table tfoot td {
-            border-bottom: none;
-            padding: 10px 12px;
-        }
-
-        .total-row th, .total-row td {
-            border-top: 2px solid #222 !important;
-            font-size: 14.5px;
-            padding-top: 14px;
-        }
-
-        .words-block {
-            font-size: 12.5px;
-            color: #333;
-            line-height: 1.4;
-            margin-top: 4px;
-            font-weight: 600;
-        }
-
-        /* Invoice Bottom Section */
-        .invoice-footer {
-            margin-top: auto; /* Pushes footer neatly to bottom of A4 */
+        .clean-invoice-details {
+            flex: 0.8;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: flex-end;
-            padding-top: 16px;
-            border-top: 1px solid #eee;
+            text-align: right;
         }
 
-        .payment-info {
+        .clean-meta-table {
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .clean-meta-table td {
+            padding: 2.5px 0;
+        }
+
+        .clean-meta-lbl {
+            color: #6b7280;
+            padding-right: 12px;
+            text-align: right;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .clean-meta-val {
+            color: #111827;
+            font-weight: 600;
+            text-align: right;
+            padding-left: 8px;
+        }
+
+        /* Items Table - Clean, Open, No Vertical Borders */
+        .clean-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 18px;
             font-size: 12.5px;
-            line-height: 1.55;
         }
 
-        .payment-info h4 {
-            margin: 0 0 5px 0;
-            color: #666;
-            text-transform: uppercase;
+        .clean-items-table th {
+            border-top: 1px solid #111827;
+            border-bottom: 1px solid #111827;
+            padding: 9px 8px;
             font-size: 11px;
-            letter-spacing: 1px;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #111827;
+            background: transparent;
+            text-align: left;
         }
 
-        .signature-box {
+        .clean-items-table th.col-sr, .clean-items-table td.col-sr {
+            width: 38px;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        .clean-items-table th.col-qty, .clean-items-table td.col-qty {
+            width: 55px;
             text-align: center;
         }
 
-        .signature-line {
-            display: inline-block;
-            margin-top: 50px;
-            border-top: 1px solid #222;
-            width: 190px;
-            padding-top: 6px;
-            font-size: 12.5px;
+        .clean-items-table th.col-rate, .clean-items-table td.col-rate {
+            width: 120px;
+            text-align: right;
+        }
+
+        .clean-items-table th.col-amount, .clean-items-table td.col-amount {
+            width: 130px;
+            text-align: right;
+        }
+
+        .clean-items-table td {
+            padding: 14px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+            color: #111827;
+        }
+
+        .clean-item-title {
             font-weight: 600;
+            font-size: 13.5px;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .clean-item-desc {
+            font-size: 12px;
+            color: #4b5563;
+            line-height: 1.5;
+        }
+
+        .clean-item-opt {
+            font-size: 11.5px;
+            color: #2563eb;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .clean-total-row th, .clean-total-row td {
+            border-top: 1px solid #111827 !important;
+            border-bottom: 1.5px solid #111827 !important;
+            padding: 12px 8px;
+        }
+
+        .clean-words-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #6b7280;
+            margin-bottom: 2px;
+        }
+
+        .clean-words-val {
+            font-size: 11.5px;
+            color: #111827;
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        .clean-total-label {
+            text-align: right;
+            font-size: 13px;
+            font-weight: 700;
+            color: #111827;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+        }
+
+        .clean-total-val {
+            text-align: right;
+            font-size: 16px;
+            font-weight: 800;
+            color: #111827;
+            vertical-align: middle;
+        }
+
+        /* Clean Footer: Bank Details (Left), Signatory (Right), TnC on Next Line */
+        .clean-footer {
+            margin-top: auto;
+        }
+
+        .clean-footer-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-bottom: 10px;
+            gap: 30px;
+        }
+
+        .clean-bank-pane {
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        .clean-footer-tag {
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .clean-bank-line {
+            color: #374151;
+        }
+
+        .clean-bank-line .lbl {
+            color: #6b7280;
+            display: inline-block;
+            width: 84px;
+        }
+
+        .clean-sign-pane {
+            text-align: center;
+            min-width: 190px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .clean-for-issuer {
+            font-size: 12px;
+            color: #374151;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 2px;
+        }
+
+        .clean-sign-space {
+            height: 48px;
+        }
+
+        .clean-sign-line {
+            border-top: 1px solid #111827;
+            padding-top: 5px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #111827;
+            display: inline-block;
+            width: 175px;
+            text-align: center;
+        }
+
+        /* Next Line: Terms & Conditions across the page (1 after 1) */
+        .clean-terms-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 8px 0 10px 0;
+        }
+
+        .clean-terms-block {
+            font-size: 11px;
+            color: #4b5563;
+            line-height: 1.5;
+        }
+
+        .clean-terms-heading {
+            font-weight: 700;
+            color: #111827;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .clean-term-line {
+            margin-bottom: 2px;
+            color: #374151;
+        }
+
+        .clean-dotted-line {
+            display: inline-block;
+            border-bottom: 1px dashed #cbd5e1;
+            min-width: 100px;
+            height: 16px;
         }
 
         /* ==============================================================
-           --- PRINT CONFIGURATION (Strict A4 page-by-page) ---
+           --- PRINT CONFIGURATION (Strict A4 Page - Clean Minimalist) ---
            ============================================================== */
         #printArea {
             display: none;
@@ -685,13 +828,14 @@
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 15mm 15mm 25mm 15mm;
+                margin: 14mm 14mm 18mm 14mm;
             }
 
             html, body {
                 background: #ffffff !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                color: #000000 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -704,30 +848,32 @@
                 display: block !important;
             }
 
-            .invoice-page {
+            .clean-invoice-page, .invoice-page {
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: space-between !important;
-                height: 252mm !important;
-                max-height: 252mm !important;
+                height: 255mm !important;
+                max-height: 255mm !important;
                 box-sizing: border-box !important;
                 page-break-after: always !important;
                 break-after: page !important;
-                padding: 0 2mm !important;
+                padding: 0 !important;
                 background: #ffffff !important;
                 overflow: hidden !important;
+                color: #000000 !important;
             }
 
-            .invoice-page:last-child {
+            .clean-invoice-page:last-child, .invoice-page:last-child {
                 page-break-after: auto !important;
                 break-after: auto !important;
             }
 
-            .activity-extra-line {
-                background: transparent !important;
-                color: #000 !important;
-                padding: 0 !important;
-                display: block !important;
+            .clean-header-divider, .clean-terms-divider {
+                background: #cccccc !important;
+            }
+
+            .clean-item-opt {
+                color: #000000 !important;
             }
         }
     </style>
@@ -743,15 +889,18 @@
         <div>
             <h1>
                 📄 Invoice Generator & Batch Printer
-                <span class="badge">Multi-Invoice Engine</span>
+                <span class="badge">Clean &amp; Minimalist Format</span>
             </h1>
             <p style="margin: 2px 0 0 0; font-size: 12.5px; color: #64748b;">
                 Add multiple invoices under shared billing info. Print all at once or individually on A4 sheets.
             </p>
         </div>
         <div class="header-actions">
-            <button class="btn btn-secondary btn-sm" onclick="loadSampleData()">
-                ✨ Load Sample Data
+            <button class="btn btn-secondary btn-sm" onclick="loadSampleData('KAJ')" title="Load Kanaiyalal Jain sample with PAN">
+                ✨ Sample: K. Jain (with PAN)
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="loadSampleData('ARJ')" title="Load Arihantkumar M. Jain sample without PAN (with Aadhaar)">
+                ✨ Sample: A. Jain (with Aadhaar)
             </button>
             <button class="btn btn-secondary btn-sm" onclick="resetAllData()">
                 🗑️ Clear All
@@ -773,33 +922,51 @@
                 <!-- Issuer Details Card -->
                 <div class="card">
                     <div class="card-header">
-                        <h2>🏢 Billed From (Your Details)</h2>
-                        <span style="font-size: 11px; color: #64748b;">Shared billing info</span>
+                        <h2>🏢 Billed From (Header Letterhead)</h2>
+                        <span style="font-size: 11px; color: #64748b;">Top Header Info</span>
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label>Invoice Issuer Name / Company *</label>
-                            <input type="text" id="issuerName" placeholder="e.g. John Doe" oninput="saveAndRefresh()">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <label style="margin-bottom: 0;">Invoice Issuer Name / Company *</label>
+                                <span id="namePrefixBadge" style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-family: monospace;">
+                                    Format: KAJ/2026-27/XXX
+                                </span>
+                            </div>
+                            <input type="text" id="issuerName" placeholder="e.g. Kanaiyalal Jain" oninput="handleIssuerNameInput()">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                                <span style="font-size: 11px; color: #64748b;">(1st 2 chars of 1st name + 1st char of last name)</span>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="syncAllInvoiceNumbersWithIssuer()" style="font-size: 10.5px; padding: 2px 7px;" title="Re-format all invoice numbers with current name initials">
+                                    🔄 Apply to All Invoices
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- PAN & AADHAR Numbers (Both Optional) -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>PAN Card Number (Optional)</label>
+                                <input type="text" id="issuerPan" placeholder="e.g. ABCDE1234F" style="text-transform: uppercase;" oninput="saveAndRefresh()">
+                            </div>
+                            <div class="form-group">
+                                <label>Aadhar No. (If PAN not available)</label>
+                                <input type="text" id="issuerAadhar" placeholder="e.g. 1234 5678 9012" oninput="saveAndRefresh()">
+                            </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>PAN Card Number *</label>
-                                <input type="text" id="issuerPan" placeholder="e.g. ABCDE1234F" style="text-transform: uppercase;" oninput="saveAndRefresh()">
-                            </div>
-                            <div class="form-group">
                                 <label>Phone (Optional)</label>
                                 <input type="text" id="issuerPhone" placeholder="+91 9876543210" oninput="saveAndRefresh()">
                             </div>
+                            <div class="form-group">
+                                <label>Email Address (Optional)</label>
+                                <input type="email" id="issuerEmail" placeholder="name@example.com" oninput="saveAndRefresh()">
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label>Email Address (Optional)</label>
-                            <input type="email" id="issuerEmail" placeholder="name@example.com" oninput="saveAndRefresh()">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Issuer Address *</label>
+                            <label>Issuer Address (Appears in Header) *</label>
                             <textarea id="issuerAddress" rows="2" placeholder="Full residential / office address..." oninput="saveAndRefresh()"></textarea>
                         </div>
 
@@ -826,7 +993,7 @@
                 <!-- Billed To Details (Fixed & Configurable) -->
                 <div class="card">
                     <div class="card-header">
-                        <h2>🏛️ Billed To (Client / Company)</h2>
+                        <h2>🏛️ Billed To (Client / Buyer)</h2>
                     </div>
                     <div class="card-body">
                         <div class="form-group">
@@ -840,6 +1007,31 @@
                         <div class="form-group">
                             <label>CIN / Tax ID</label>
                             <input type="text" id="clientCin" value="CIN: U73100RJ2024PTC098563" oninput="saveAndRefresh()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms & Conditions Config Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📜 Terms & Conditions</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Jurisdiction State</label>
+                                <input type="text" id="termsJurisdiction" value="Rajasthan" oninput="saveAndRefresh()">
+                            </div>
+                            <div class="form-group">
+                                <label>Payment Due</label>
+                                <input type="text" id="termsPaymentDue" value="Immediate" oninput="saveAndRefresh()">
+                            </div>
+                        </div>
+                        <div style="font-size: 11.5px; color: #64748b; background: #f8fafc; padding: 6px 10px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                            <strong>Default printed terms:</strong><br>
+                            • E.&amp; O.E.<br>
+                            • Subject to '<span id="previewJurisdiction">Rajasthan</span>' Jurisdiction only.<br>
+                            • Payment Due: <span id="previewPaymentDue">Immediate</span>
                         </div>
                     </div>
                 </div>
@@ -864,9 +1056,20 @@
                 <!-- Date Formatting & Placeholder Options -->
                 <div class="card">
                     <div class="card-header">
-                        <h2>⚙️ Date & Placeholder Options</h2>
+                        <h2>⚙️ Display & Formatting Options</h2>
                     </div>
                     <div class="card-body">
+                        <div class="form-group">
+                            <label>Document Title (Appears at top)</label>
+                            <input type="text" id="invoiceDocTitle" value="INVOICE" placeholder="e.g. INVOICE or TAX INVOICE" oninput="saveAndRefresh()">
+                        </div>
+                        <div class="form-group">
+                            <label>Invoice Header Layout</label>
+                            <select id="headerLayoutSelect" onchange="saveAndRefresh()">
+                                <option value="clean" selected>Clean Minimalist (Centered Letterhead - No Boxy Borders)</option>
+                                <option value="classic">Classic Side-by-Side (Clean Minimalist)</option>
+                            </select>
+                        </div>
                         <div class="form-group">
                             <label>Date Format in Invoices & Placeholders</label>
                             <select id="dateFormatSelect" onchange="saveAndRefresh()">
@@ -931,11 +1134,17 @@
                                 <button type="button" class="tag-pill" onclick="insertTag('{{Last_billing_date}}')" title="Nearest prior billing date">
                                     {{Last_billing_date}}
                                 </button>
+                                <button type="button" class="tag-pill" onclick="insertTag('{{previous_month}}')" title="Previous month e.g. October 2025">
+                                    {{previous_month}}
+                                </button>
+                                <button type="button" class="tag-pill" onclick="insertTag('{{previous_m_date}}')" title="Previous month span e.g. 1st Oct 2025 to 31st October 2025">
+                                    {{previous_m_date}}
+                                </button>
                                 <span class="tag-pill-desc">(Inserts into active input or template)</span>
                             </div>
 
                             <div class="apply-template-row">
-                                <input type="text" id="globalTemplateInput" placeholder="Template e.g. Services rendered from {{Last_billing_date}} to {{billing_date}}" style="font-size: 12px; padding: 7px 10px;">
+                                <input type="text" id="globalTemplateInput" placeholder="Template e.g. Services rendered for {{previous_month}} ({{previous_m_date}})" style="font-size: 12px; padding: 7px 10px;">
                                 <button class="btn btn-secondary btn-sm" onclick="applyTemplateToRows(false)" title="Apply to selected rows only">
                                     Apply to Selected
                                 </button>
@@ -953,7 +1162,7 @@
                                         <th style="width: 35px; text-align: center;">
                                             <input type="checkbox" id="selectAllCheckbox" onchange="handleHeaderCheckbox(this)">
                                         </th>
-                                        <th style="width: 180px; min-width: 175px;">Invoice No</th>
+                                        <th style="width: 190px; min-width: 185px;">Invoice No</th>
                                         <th style="width: 135px; min-width: 130px;">Date *</th>
                                         <th style="width: 115px; min-width: 110px;">Amount (₹) *</th>
                                         <th style="min-width: 250px;">Optional Line (Supports {{tags}})</th>
@@ -979,7 +1188,7 @@
                 <div class="preview-pane-wrapper">
                     <div class="preview-controls">
                         <div>
-                            <strong style="font-size: 15px; color: #1e293b;">📄 Live A4 Print Preview</strong>
+                            <strong style="font-size: 15px; color: #1e293b;">📄 Live A4 Print Preview (Busy Accounting Format)</strong>
                             <span style="font-size: 12px; color: #64748b; margin-left: 8px;">
                                 (Showing exactly how each page prints on A4)
                             </span>
@@ -1031,7 +1240,7 @@
     <div class="form-row">
         <div class="form-group">
             <label>Start Date</label>
-            <input type="date" id="batchStartDate">
+            <input type="date" id="batchStartDate" onchange="updateBatchPrefixFromDate()">
         </div>
         <div class="form-group">
             <label>Frequency</label>
@@ -1046,22 +1255,26 @@
 
     <div class="form-group">
         <label>Invoice No. Prefix</label>
-        <input type="text" id="batchPrefix" value="ASS/2026-27/" placeholder="e.g. ASS/2026-27/">
+        <input type="text" id="batchPrefix" value="KAJ/2026-27/" placeholder="e.g. KAJ/2026-27/">
     </div>
 
     <div class="form-group">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
             <label style="margin-bottom: 0;">Optional Line Template (Supports Date Tags)</label>
         </div>
-        <div style="display: flex; gap: 5px; margin-bottom: 6px;">
+        <div style="display: flex; gap: 5px; margin-bottom: 6px; flex-wrap: wrap;">
             <button type="button" class="tag-pill" onclick="insertBatchTag('{{billing_date}}')">{{billing_date}}</button>
             <button type="button" class="tag-pill" onclick="insertBatchTag('{{before_billing}}')">{{before_billing}}</button>
             <button type="button" class="tag-pill" onclick="insertBatchTag('{{Last_billing_date}}')">{{Last_billing_date}}</button>
+            <button type="button" class="tag-pill" onclick="insertBatchTag('{{previous_month}}')" title="e.g. October 2025">{{previous_month}}</button>
+            <button type="button" class="tag-pill" onclick="insertBatchTag('{{previous_m_date}}')" title="e.g. 1st Oct 2025 to 31st October 2025">{{previous_m_date}}</button>
         </div>
-        <input type="text" id="batchOptionalNote" value="Services rendered from {{Last_billing_date}} to {{billing_date}}" placeholder="e.g. Services rendered from {{Last_billing_date}} to {{billing_date}}">
-        <div style="display: flex; gap: 6px; margin-top: 5px;">
+        <input type="text" id="batchOptionalNote" value="Services rendered from {{Last_billing_date}} to {{billing_date}}" placeholder="e.g. Services rendered for {{previous_month}} ({{previous_m_date}})">
+        <div style="display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap;">
             <button type="button" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 2px 7px;" onclick="setBatchTemplate('Services rendered from {{Last_billing_date}} to {{billing_date}}')">Preset 1: Last to Current</button>
             <button type="button" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 2px 7px;" onclick="setBatchTemplate('Services rendered from {{Last_billing_date}} to {{before_billing}}')">Preset 2: Last to Day Before</button>
+            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 2px 7px;" onclick="setBatchTemplate('Services rendered for {{previous_month}}')">Preset 3: Month Name</button>
+            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 2px 7px;" onclick="setBatchTemplate('Services rendered from {{previous_m_date}}')">Preset 4: Month Span</button>
         </div>
     </div>
 
@@ -1086,16 +1299,123 @@
 
         loadSavedData();
         if (invoiceList.length === 0) {
-            loadSampleData();
+            loadSampleData('KAJ');
         } else {
+            updateIssuerNameBadge();
             renderTable();
             renderScreenPreview();
         }
     });
 
+    // --- NAME INITIALS & FINANCIAL YEAR ENGINE ---
+
+    // Extract: 1st 2 chars of 1st name + 1st char of last name
+    // e.g. "Kanaiyalal Jain" -> "KAJ"
+    // e.g. "Arihantkumar Meghrajbhai Jain" -> "ARJ"
+    function getNameInitials(fullName) {
+        if (!fullName || typeof fullName !== 'string') return 'INV';
+        const parts = fullName.trim().split(/\s+/).filter(Boolean);
+        if (parts.length === 0) return 'INV';
+        
+        const firstName = parts[0].toUpperCase().replace(/[^A-Z]/g, '');
+        if (parts.length === 1) {
+            return (firstName.substring(0, 3) || 'INV').padEnd(3, 'X');
+        }
+        
+        const lastName = parts[parts.length - 1].toUpperCase().replace(/[^A-Z]/g, '');
+        const firstTwo = (firstName.substring(0, 2) || 'XX').padEnd(2, 'X');
+        const lastOne = (lastName.substring(0, 1) || 'X');
+        return `${firstTwo}${lastOne}`;
+    }
+
+    // Calculate Indian Financial Year (e.g. 2026-27 for Nov 2026)
+    function getFinancialYear(dateStr) {
+        let dt = dateStr ? new Date(dateStr) : new Date();
+        if (isNaN(dt.getTime())) dt = new Date();
+        const y = dt.getFullYear();
+        const m = dt.getMonth() + 1; // 1 to 12
+        if (m >= 4) {
+            const nextY = String(y + 1).slice(-2);
+            return `${y}-${nextY}`;
+        } else {
+            const prevY = y - 1;
+            const curY = String(y).slice(-2);
+            return `${prevY}-${curY}`;
+        }
+    }
+
+    // Get default invoice prefix like "KAJ/2026-27/"
+    function getDefaultInvoicePrefix(dateStr) {
+        const issuerInput = document.getElementById('issuerName');
+        const name = issuerInput ? issuerInput.value.trim() : '';
+        const initials = getNameInitials(name || 'Kanaiyalal Jain');
+        const fy = getFinancialYear(dateStr);
+        return `${initials}/${fy}/`;
+    }
+
+    // Update the live format badge in Billed From section
+    function updateIssuerNameBadge() {
+        const badge = document.getElementById('namePrefixBadge');
+        if (!badge) return;
+        const prefix = getDefaultInvoicePrefix();
+        badge.textContent = `Format: ${prefix}XXX`;
+    }
+
+    function handleIssuerNameInput() {
+        updateIssuerNameBadge();
+        saveAndRefresh();
+    }
+
+    // Sync all existing invoices to match the current issuer name prefix
+    function syncAllInvoiceNumbersWithIssuer() {
+        if (invoiceList.length === 0) {
+            showToast('No invoices to update.');
+            return;
+        }
+        const issuerName = document.getElementById('issuerName').value.trim();
+        const initials = getNameInitials(issuerName);
+        let updatedCount = 0;
+
+        invoiceList.forEach((inv, index) => {
+            const fy = getFinancialYear(inv.date);
+            const prefix = `${initials}/${fy}/`;
+            let seq = String(index + 1).padStart(3, '0');
+            if (inv.invoiceNo) {
+                const match = inv.invoiceNo.match(/(\d+)$/);
+                if (match) {
+                    seq = match[1];
+                }
+            }
+            inv.invoiceNo = `${prefix}${seq}`;
+            updatedCount++;
+        });
+
+        saveAndRefresh();
+        showToast(`Updated ${updatedCount} invoice(s) to ${initials}/... prefix`);
+    }
+
+    // Smart invoice number calculator: increments or builds format e.g. KAJ/2026-27/001
+    function getNextInvoiceNumber(forDate = null) {
+        if (invoiceList.length === 0) {
+            return `${getDefaultInvoicePrefix(forDate)}001`;
+        }
+        const lastInv = invoiceList[invoiceList.length - 1];
+        if (lastInv && lastInv.invoiceNo) {
+            const match = lastInv.invoiceNo.match(/^(.*?)(\d+)$/);
+            if (match) {
+                const prefix = match[1];
+                const numStr = match[2];
+                const nextNum = parseInt(numStr, 10) + 1;
+                const paddedNextNum = String(nextNum).padStart(numStr.length, '0');
+                return `${prefix}${paddedNextNum}`;
+            }
+        }
+        const seqNum = String(invoiceList.length + 1).padStart(3, '0');
+        return `${getDefaultInvoicePrefix(forDate)}${seqNum}`;
+    }
+
     // --- DATE CALCULATIONS & PLACEHOLDER REPLACER ENGINE ---
 
-    // 1. Calculate 1 day before a given YYYY-MM-DD date safely
     function getOneDayBefore(dateStr) {
         if (!dateStr) return '';
         const parts = dateStr.split('-');
@@ -1103,7 +1423,6 @@
         const y = parseInt(parts[0], 10);
         const m = parseInt(parts[1], 10);
         const d = parseInt(parts[2], 10);
-        // Using local constructor avoids UTC timezone shifts
         const dt = new Date(y, m - 1, d);
         dt.setDate(dt.getDate() - 1);
 
@@ -1113,27 +1432,22 @@
         return `${prevY}-${prevM}-${prevD}`;
     }
 
-    // 2. Find nearest billing date before currentDateStr across all invoices
     function getLastBillingDate(currentDateStr, allInvoices, fallbackInitialDate = '') {
         if (!currentDateStr) return '';
 
-        // Filter all distinct valid dates that are strictly before currentDateStr
         const earlierDates = allInvoices
             .map(inv => inv.date)
             .filter(d => d && d < currentDateStr);
 
         if (earlierDates.length > 0) {
-            // Sort descending to get the nearest prior date
             earlierDates.sort((a, b) => b.localeCompare(a));
             return earlierDates[0];
         }
 
-        // If user configured a custom fallback date in settings
         if (fallbackInitialDate) {
             return fallbackInitialDate;
         }
 
-        // Default smart fallback: 1st of the same month (e.g. 2026-10-01)
         const parts = currentDateStr.split('-');
         if (parts.length === 3) {
             return `${parts[0]}-${parts[1]}-01`;
@@ -1141,7 +1455,6 @@
         return currentDateStr;
     }
 
-    // 3. Format Date according to user preference
     function formatCustomDate(dateStr, formatStyle = 'DD/MM/YYYY') {
         if (!dateStr) return '';
         const parts = dateStr.split('-');
@@ -1161,11 +1474,45 @@
         } else if (formatStyle === 'DD / MM / YYYY') {
             return `${d} / ${m} / ${y}`;
         }
-        // Default DD/MM/YYYY
         return `${d}/${m}/${y}`;
     }
 
-    // 4. Core Replacer Function: replaces {{billing_date}}, {{before_billing}}, {{Last_billing_date}}
+    function getOrdinalSuffix(day) {
+        const j = day % 10, k = day % 100;
+        if (j === 1 && k !== 11) return day + 'st';
+        if (j === 2 && k !== 12) return day + 'nd';
+        if (j === 3 && k !== 13) return day + 'rd';
+        return day + 'th';
+    }
+
+    function getPreviousMonthData(dateStr) {
+        if (!dateStr) return { prevMonth: '', prevMDate: '' };
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return { prevMonth: '', prevMDate: '' };
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        if (isNaN(y) || isNaN(m)) return { prevMonth: '', prevMDate: '' };
+
+        let prevY = y;
+        let prevM = m - 1;
+        if (prevM < 1) {
+            prevM = 12;
+            prevY = y - 1;
+        }
+
+        const fullMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const shortMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        const fullMonthName = fullMonths[prevM - 1];
+        const shortMonthName = shortMonths[prevM - 1];
+        const lastDayNum = new Date(prevY, prevM, 0).getDate();
+
+        const prevMonth = `${fullMonthName} ${prevY}`;
+        const prevMDate = `1st ${shortMonthName} ${prevY} to ${getOrdinalSuffix(lastDayNum)} ${fullMonthName} ${prevY}`;
+
+        return { prevMonth, prevMDate };
+    }
+
     function replaceDatePlaceholders(text, currentInvoice, allInvoices, formatStyle, initialFallback) {
         if (!text) return '';
         if (!currentInvoice || !currentInvoice.date) return text;
@@ -1176,16 +1523,21 @@
         const billingDateStr = currentInvoice.date;
         const beforeBillingDateStr = getOneDayBefore(billingDateStr);
         const lastBillingDateStr = getLastBillingDate(billingDateStr, allInvoices, fallback);
+        const prevMonthInfo = getPreviousMonthData(billingDateStr);
 
         const formattedBilling = formatCustomDate(billingDateStr, currentDateFormat);
         const formattedBefore = formatCustomDate(beforeBillingDateStr, currentDateFormat);
         const formattedLast = formatCustomDate(lastBillingDateStr, currentDateFormat);
+        const formattedPrevMonth = prevMonthInfo.prevMonth;
+        const formattedPrevMDate = prevMonthInfo.prevMDate;
 
-        // Case-insensitive replacement for user convenience
         return text
             .replace(/\{\{billing_date\}\}/gi, formattedBilling)
             .replace(/\{\{before_billing\}\}/gi, formattedBefore)
-            .replace(/\{\{last_billing_date\}\}/gi, formattedLast);
+            .replace(/\{\{last_billing_date\}\}/gi, formattedLast)
+            .replace(/\{\{previous_month\}\}/gi, formattedPrevMonth)
+            .replace(/\{\{previous_m_date\}\}/gi, formattedPrevMDate)
+            .replace(/\{\{previous_month_date\}\}/gi, formattedPrevMDate);
     }
 
     // --- INDIAN NUMBER TO WORDS CONVERTER ---
@@ -1219,33 +1571,12 @@
         return words.replace(/\s+/g, ' ');
     }
 
-    // Format currency to Indian Rupees format
     function formatINR(amount) {
         if (amount === '' || isNaN(amount)) return '0.00';
         return Number(amount).toLocaleString('en-IN', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-    }
-
-    // Smart invoice number calculator: increments pattern like ASS/2026-27/001 -> ASS/2026-27/002
-    function getNextInvoiceNumber() {
-        if (invoiceList.length === 0) {
-            return 'ASS/2026-27/001';
-        }
-        const lastInv = invoiceList[invoiceList.length - 1];
-        if (lastInv && lastInv.invoiceNo) {
-            const match = lastInv.invoiceNo.match(/^(.*?)(\d+)$/);
-            if (match) {
-                const prefix = match[1];
-                const numStr = match[2];
-                const nextNum = parseInt(numStr, 10) + 1;
-                const paddedNextNum = String(nextNum).padStart(numStr.length, '0');
-                return `${prefix}${paddedNextNum}`;
-            }
-        }
-        const seqNum = String(invoiceList.length + 1).padStart(3, '0');
-        return `ASS/2026-27/${seqNum}`;
     }
 
     // --- DYNAMIC INVOICE ROW MANAGEMENT ---
@@ -1256,7 +1587,7 @@
         const newRow = customData || {
             id: nextId,
             selected: true,
-            invoiceNo: getNextInvoiceNumber(),
+            invoiceNo: getNextInvoiceNumber(defaultDate),
             date: defaultDate,
             amount: 18500,
             optionalLine: 'Services rendered from {{Last_billing_date}} to {{billing_date}}'
@@ -1305,7 +1636,6 @@
             item[field] = value;
             saveState();
             updateStats();
-            // Re-render table row previews if date or optional line changed
             if (field === 'date' || field === 'optionalLine') {
                 renderTable();
             }
@@ -1350,7 +1680,6 @@
     function insertTag(tag) {
         const globalInput = document.getElementById('globalTemplateInput');
         
-        // If a specific row's input was recently active
         if (lastActiveOptionalInput && document.body.contains(lastActiveOptionalInput)) {
             const input = lastActiveOptionalInput;
             const start = input.selectionStart || input.value.length;
@@ -1363,7 +1692,6 @@
             return;
         }
 
-        // Otherwise insert into global template input
         if (globalInput) {
             const start = globalInput.selectionStart || globalInput.value.length;
             const end = globalInput.selectionEnd || globalInput.value.length;
@@ -1409,7 +1737,14 @@
     }
 
     // --- QUICK BATCH GENERATOR MODAL ---
+    function updateBatchPrefixFromDate() {
+        const dateVal = document.getElementById('batchStartDate').value;
+        const prefix = getDefaultInvoicePrefix(dateVal);
+        document.getElementById('batchPrefix').value = prefix;
+    }
+
     function showQuickAddModal() {
+        updateBatchPrefixFromDate();
         const modal = document.getElementById('batchModal');
         if (modal) modal.showModal();
     }
@@ -1419,7 +1754,8 @@
         const amount = parseFloat(document.getElementById('batchAmount').value) || 0;
         const startDateStr = document.getElementById('batchStartDate').value || new Date().toISOString().split('T')[0];
         const freq = document.getElementById('batchFrequency').value;
-        const prefix = document.getElementById('batchPrefix').value || 'ASS/2026-27/';
+        const defaultPrefix = getDefaultInvoicePrefix(startDateStr);
+        const prefix = document.getElementById('batchPrefix').value || defaultPrefix;
         const noteTemplate = document.getElementById('batchOptionalNote').value;
 
         let curDate = new Date(startDateStr);
@@ -1438,7 +1774,6 @@
                 optionalLine: noteTemplate
             });
 
-            // Increment date based on frequency
             if (freq === 'monthly') {
                 curDate.setMonth(curDate.getMonth() + 1);
             } else if (freq === 'biweekly') {
@@ -1446,7 +1781,6 @@
             } else if (freq === 'weekly') {
                 curDate.setDate(curDate.getDate() + 7);
             }
-            // sameday does not increment
         }
 
         document.getElementById('batchModal').close();
@@ -1476,7 +1810,6 @@
         invoiceList.forEach((inv, index) => {
             const tr = document.createElement('tr');
             
-            // Resolve optional line preview in real time
             const resolvedPreview = replaceDatePlaceholders(inv.optionalLine || '', inv, invoiceList);
             const previewHTML = resolvedPreview ? `<div class="resolved-subtext">🔍 <strong>Resolved:</strong> ${escapeHtml(resolvedPreview)}</div>` : '';
 
@@ -1484,8 +1817,8 @@
                 <td style="text-align: center;">
                     <input type="checkbox" ${inv.selected ? 'checked' : ''} onchange="toggleRowSelection('${inv.id}', this)">
                 </td>
-                <td style="min-width: 175px;">
-                    <input type="text" class="inv-no-input" value="${escapeHtml(inv.invoiceNo || '')}" placeholder="ASS/2026-27/001" onfocus="this.select()" onchange="updateInvoiceField('${inv.id}', 'invoiceNo', this.value)">
+                <td style="min-width: 185px;">
+                    <input type="text" class="inv-no-input" value="${escapeHtml(inv.invoiceNo || '')}" placeholder="KAJ/2026-27/001" onfocus="this.select()" onchange="updateInvoiceField('${inv.id}', 'invoiceNo', this.value)">
                 </td>
                 <td>
                     <input type="date" value="${inv.date || ''}" onchange="updateInvoiceField('${inv.id}', 'date', this.value)">
@@ -1512,7 +1845,6 @@
             tbody.appendChild(tr);
         });
 
-        // Header checkbox state
         const allSelected = invoiceList.length > 0 && invoiceList.every(i => i.selected);
         const headerCheck = document.getElementById('selectAllCheckbox');
         if (headerCheck) headerCheck.checked = allSelected;
@@ -1537,12 +1869,15 @@
         document.getElementById('selectedCountBadge').textContent = selectedCount;
     }
 
-    // --- GENERATE INVOICE HTML FOR A SPECIFIC INVOICE ITEM ---
+    // --- GENERATE INVOICE HTML FOR A SPECIFIC INVOICE ITEM (BUSY ACCOUNTING FORMAT) ---
     function generateInvoicePageHTML(inv, pageIndex, totalPages) {
-        // Collect common billing info
         const issuerName = document.getElementById('issuerName').value.trim() || '_______________________';
         const issuerAddress = document.getElementById('issuerAddress').value.trim() || '_______________________\n_______________________';
-        const issuerPan = document.getElementById('issuerPan').value.trim() || '_________________';
+        
+        // PAN and Aadhar Optional logic
+        const issuerPan = document.getElementById('issuerPan') ? document.getElementById('issuerPan').value.trim() : '';
+        const issuerAadhar = document.getElementById('issuerAadhar') ? document.getElementById('issuerAadhar').value.trim() : '';
+        
         const issuerPhone = document.getElementById('issuerPhone').value.trim();
         const issuerEmail = document.getElementById('issuerEmail').value.trim();
 
@@ -1554,16 +1889,19 @@
         const clientAddress = document.getElementById('clientAddress').value.trim() || 'Ward No. 29, Pani Tanki Ke Pass, Nokha,\nBikaner, Nokha, Rajasthan, India, 334803';
         const clientCin = document.getElementById('clientCin').value.trim() || 'CIN: U73100RJ2024PTC098563';
 
+        const termsJurisdiction = document.getElementById('termsJurisdiction') ? document.getElementById('termsJurisdiction').value.trim() || 'Rajasthan' : 'Rajasthan';
+        const termsPaymentDue = document.getElementById('termsPaymentDue') ? document.getElementById('termsPaymentDue').value.trim() || 'Immediate' : 'Immediate';
+        const docTitle = document.getElementById('invoiceDocTitle') ? document.getElementById('invoiceDocTitle').value.trim() || 'INVOICE' : 'INVOICE';
+
         const rawActivityName = document.getElementById('activityName').value.trim() || 'Back Office Data Entry & Administrative Support';
         const rawActivityDesc = document.getElementById('activityDesc').value.trim() || 'Routine data entry, data sorting, form input, record updating, information categorisation and other back-office administrative support activities.';
 
         const currentDateFormat = document.getElementById('dateFormatSelect') ? document.getElementById('dateFormatSelect').value : 'DD/MM/YYYY';
         const initialFallback = document.getElementById('initialDateFallback') ? document.getElementById('initialDateFallback').value : '';
+        const layoutStyle = document.getElementById('headerLayoutSelect') ? document.getElementById('headerLayoutSelect').value : 'busy';
 
-        // Resolve any {{placeholders}} in description and optional line
         const activityDesc = replaceDatePlaceholders(rawActivityDesc, inv, invoiceList, currentDateFormat, initialFallback);
 
-        // Format Date
         let dateHTML = '';
         if (inv.date) {
             dateHTML = `<span class="date-display">${formatCustomDate(inv.date, currentDateFormat)}</span>`;
@@ -1575,120 +1913,187 @@
             `;
         }
 
-        // Format Invoice Number
         let invoiceNoHTML = inv.invoiceNo 
-            ? `<strong style="font-size: 15px;">${escapeHtml(inv.invoiceNo)}</strong>`
+            ? `<strong style="font-size: 14px; letter-spacing: 0.3px;">&nbsp; ${escapeHtml(inv.invoiceNo)}</strong>`
             : `<span class="dotted-line"></span>`;
 
-        // Format Amount & Words
         const hasAmount = inv.amount !== '' && inv.amount !== undefined && !isNaN(inv.amount);
         const numAmount = hasAmount ? parseFloat(inv.amount) : 0;
         const formattedPrice = hasAmount ? `₹ ${formatINR(numAmount)}` : '';
         const words = hasAmount ? numberToIndianWords(numAmount) : '';
 
-        // Optional line after description (with dynamic date replacement!)
         let optionalLineHTML = '';
         if (inv.optionalLine && inv.optionalLine.trim() !== '') {
             const resolvedOptionalLine = replaceDatePlaceholders(inv.optionalLine.trim(), inv, invoiceList, currentDateFormat, initialFallback);
             optionalLineHTML = `<div class="activity-extra-line">${escapeHtml(resolvedOptionalLine)}</div>`;
         }
 
-        // Optional Phone/Email rows
-        const phoneRow = issuerPhone ? `<div class="info-line"><strong>Phone:</strong> ${escapeHtml(issuerPhone)}</div>` : '';
-        const emailRow = issuerEmail ? `<div class="info-line"><strong>Email:</strong> ${escapeHtml(issuerEmail)}</div>` : '';
-
-        // Clean newline preservation for addresses
         const formattedIssuerAddr = issuerAddress.replace(/\n/g, '<br>');
+        const formattedIssuerAddrSingle = issuerAddress.replace(/\n/g, ', ');
         const formattedClientAddr = clientAddress.replace(/\n/g, '<br>');
 
-        return `
-        <div class="invoice-page">
-            <div class="invoice-content">
-                <!-- Header -->
-                <div class="invoice-header">
-                    <h1 class="invoice-title">Invoice</h1>
-                    <div class="header-meta">
-                        <div style="margin-bottom: 8px;">
-                            <strong>Invoice No:</strong> ${invoiceNoHTML}
-                        </div>
-                        <div>
-                            <strong>Date:</strong> ${dateHTML}
-                        </div>
+        // Construct Header based on chosen style
+        let headerSectionHTML = '';
+
+        // Determine Identity Chips (PAN / Aadhar / Phone / Email)
+        let idChipsArr = [];
+        if (issuerPan) {
+            idChipsArr.push(`<span><strong>PAN:</strong> ${escapeHtml(issuerPan)}</span>`);
+        }
+        if (issuerAadhar) {
+            idChipsArr.push(`<span><strong>Aadhar:</strong> ${escapeHtml(issuerAadhar)}</span>`);
+        }
+        if (issuerPhone) {
+            idChipsArr.push(`<span><strong>Phone:</strong> ${escapeHtml(issuerPhone)}</span>`);
+        }
+        if (issuerEmail) {
+            idChipsArr.push(`<span><strong>Email:</strong> ${escapeHtml(issuerEmail)}</span>`);
+        }
+        const metaChipsLine = idChipsArr.join(' &nbsp;•&nbsp; ');
+
+        if (layoutStyle === 'classic') {
+            const phoneRow = issuerPhone ? `<div class="info-line"><strong>Phone:</strong> ${escapeHtml(issuerPhone)}</div>` : '';
+            const emailRow = issuerEmail ? `<div class="info-line"><strong>Email:</strong> ${escapeHtml(issuerEmail)}</div>` : '';
+            let classicIdRow = '';
+            if (issuerPan) classicIdRow += `<div style="margin-top: 2px;"><strong>PAN:</strong> ${escapeHtml(issuerPan)}</div>`;
+            if (issuerAadhar) classicIdRow += `<div style="margin-top: 2px;"><strong>Aadhar:</strong> ${escapeHtml(issuerAadhar)}</div>`;
+
+            headerSectionHTML = `
+                <!-- Invoice Document Title at Header Top -->
+                <div class="clean-doc-title" style="text-align: center; margin-bottom: 12px;">${escapeHtml(docTitle)}</div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid #111827; padding-bottom: 10px;">
+                    <div style="font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;">
+                        Billing Summary
+                    </div>
+                    <div style="text-align: right; font-size: 12.5px; color: #111827;">
+                        <div style="margin-bottom: 4px;"><strong>Invoice No:</strong>&nbsp; ${invoiceNoHTML}</div>
+                        <div><strong>Date:</strong>&nbsp; ${dateHTML}</div>
                     </div>
                 </div>
-
-                <!-- Billed From / Billed To Section -->
-                <div class="info-grid">
-                    <div class="info-block">
-                        <h4>Billed From</h4>
-                        <div class="info-line"><strong style="font-size: 15.5px; color: #111;">${escapeHtml(issuerName)}</strong></div>
-                        <div class="info-line" style="color: #333;">${formattedIssuerAddr}</div>
+                <div style="display: flex; justify-content: space-between; gap: 24px; margin-bottom: 22px; font-size: 12px; line-height: 1.5;">
+                    <div>
+                        <div class="clean-section-tag">Billed From</div>
+                        <div class="clean-party-name">${escapeHtml(issuerName)}</div>
+                        <div class="clean-party-addr">${formattedIssuerAddr}</div>
                         ${phoneRow}
                         ${emailRow}
-                        <div class="info-line" style="margin-top: 2px;"><strong>PAN:</strong> ${escapeHtml(issuerPan)}</div>
+                        ${classicIdRow}
                     </div>
-                    <div class="info-block" style="text-align: right;">
-                        <h4>Billed To</h4>
-                        <div class="info-line"><strong style="font-size: 15.5px; color: #111;">${escapeHtml(clientName)}</strong></div>
-                        <div class="info-line" style="color: #333;">${formattedClientAddr}</div>
-                        <div class="info-line" style="margin-top: 2px;"><strong>${escapeHtml(clientCin)}</strong></div>
+                    <div style="text-align: right;">
+                        <div class="clean-section-tag">Billed To</div>
+                        <div class="clean-party-name">${escapeHtml(clientName)}</div>
+                        <div class="clean-party-addr">${formattedClientAddr}</div>
+                        <div class="clean-party-cin">${escapeHtml(clientCin)}</div>
                     </div>
                 </div>
+            `;
+        } else {
+            // Default Clean Minimalist Header: INVOICE moved to the header top
+            headerSectionHTML = `
+                <!-- Top Issuer Letterhead with INVOICE at the very top -->
+                <header class="clean-header">
+                    <div class="clean-doc-title">${escapeHtml(docTitle)}</div>
+                    <h1 class="clean-issuer-name">${escapeHtml(issuerName)}</h1>
+                    <div class="clean-issuer-addr">${formattedIssuerAddrSingle}</div>
+                    <div class="clean-issuer-meta">
+                        ${metaChipsLine}
+                    </div>
+                </header>
 
-                <!-- Items & Services Table -->
-                <table class="items-table">
+                <div class="clean-header-divider"></div>
+
+                <!-- Meta Section: Billed To (Left) & Invoice Details (Right) -->
+                <div class="clean-sub-grid">
+                    <div class="clean-billed-to">
+                        <div class="clean-section-tag">Billed To (Buyer)</div>
+                        <div class="clean-party-name">${escapeHtml(clientName)}</div>
+                        <div class="clean-party-addr">${formattedClientAddr}</div>
+                        <div class="clean-party-cin">${escapeHtml(clientCin)}</div>
+                    </div>
+                    <div class="clean-invoice-details">
+                        <table class="clean-meta-table">
+                            <tr>
+                                <td class="clean-meta-lbl">Invoice No:</td>
+                                <td class="clean-meta-val">${invoiceNoHTML}</td>
+                            </tr>
+                            <tr>
+                                <td class="clean-meta-lbl">Dated:</td>
+                                <td class="clean-meta-val">&nbsp; ${dateHTML}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+        <div class="clean-invoice-page">
+            <div class="clean-invoice-content">
+                ${headerSectionHTML}
+
+                <!-- Items & Services Table (Clean & Open) -->
+                <table class="clean-items-table">
                     <thead>
                         <tr>
-                            <th>Description</th>
-                            <th class="center" style="width: 75px;">Qty</th>
-                            <th class="right" style="width: 130px;">Price (₹)</th>
-                            <th class="right" style="width: 140px;">Amount (₹)</th>
+                            <th class="col-sr">Sr.</th>
+                            <th class="col-desc">Description of Services</th>
+                            <th class="col-qty">Qty</th>
+                            <th class="col-rate">Rate (₹)</th>
+                            <th class="col-amount">Amount (₹)</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>
-                                <div class="activity-title">${escapeHtml(rawActivityName)}</div>
-                                <div class="activity-desc">${escapeHtml(activityDesc)}</div>
+                            <td class="col-sr">1</td>
+                            <td class="col-desc">
+                                <div class="clean-item-title">${escapeHtml(rawActivityName)}</div>
+                                <div class="clean-item-desc">${escapeHtml(activityDesc)}</div>
                                 ${optionalLineHTML}
                             </td>
-                            <td class="center" style="vertical-align: middle; font-weight: 600;">1</td>
-                            <td class="right" style="vertical-align: middle; font-weight: 600;">${formattedPrice}</td>
-                            <td class="right" style="vertical-align: middle; font-weight: 700; font-size: 14px;">${formattedPrice}</td>
+                            <td class="col-qty">1</td>
+                            <td class="col-rate">${formattedPrice}</td>
+                            <td class="col-amount"><strong>${formattedPrice}</strong></td>
                         </tr>
-                        <tr class="empty-row"><td></td><td></td><td></td><td></td></tr>
-                        <tr class="empty-row"><td></td><td></td><td></td><td></td></tr>
-                        <tr class="empty-row"><td></td><td></td><td></td><td></td></tr>
                     </tbody>
                     <tfoot>
-                        <tr class="total-row">
-                            <td colspan="2" style="vertical-align: top; border-right: none;">
-                                <strong style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #555;">Amount in Words:</strong><br>
-                                ${hasAmount ? `<div class="words-block">${escapeHtml(words)}</div>` : `
-                                    <span style="display:inline-block; border-bottom: 1px dashed #777; width: 95%; height: 22px; margin-top: 3px;"></span><br>
-                                    <span style="display:inline-block; border-bottom: 1px dashed #777; width: 95%; height: 22px;"></span>
-                                `}
+                        <tr class="clean-total-row">
+                            <td colspan="3" class="clean-words-cell">
+                                <div class="clean-words-label">Amount in Words:</div>
+                                ${hasAmount ? `<div class="clean-words-val">INR ${escapeHtml(words)}</div>` : `<span class="clean-dotted-line"></span>`}
                             </td>
-                            <th class="right" style="vertical-align: top; font-size: 14px;">Total Amount:</th>
-                            <td class="right" style="vertical-align: top; font-weight: 800; font-size: 16px;">
-                                ${hasAmount ? formattedPrice : `<span style="display:inline-block; border-bottom: 1px dashed #777; width: 100px;"></span>`}
-                            </td>
+                            <th class="clean-total-label">Total Amount:</th>
+                            <td class="clean-total-val">${hasAmount ? formattedPrice : `<span class="clean-dotted-line"></span>`}</td>
                         </tr>
                     </tfoot>
                 </table>
 
-                <!-- Bottom Footer: Bank Info & Signature -->
-                <div class="invoice-footer">
-                    <div class="payment-info">
-                        <h4>Payment Information</h4>
-                        <div class="info-line"><strong>Bank Name:</strong> ${escapeHtml(bankName)}</div>
-                        <div class="info-line"><strong>Account No:</strong> ${escapeHtml(accNo)}</div>
-                        <div class="info-line"><strong>IFSC Code:</strong> ${escapeHtml(ifsc)}</div>
+                <!-- Bottom Section: Bank Info (Left), Authorized Signatory (Right) and TnC on NEXT LINE -->
+                <div class="clean-footer">
+                    <div class="clean-footer-top">
+                        <!-- Bank Details -->
+                        <div class="clean-bank-pane">
+                            <div class="clean-footer-tag">Payment Information</div>
+                            <div class="clean-bank-line"><span class="lbl">Bank Name:</span> <strong>${escapeHtml(bankName)}</strong></div>
+                            <div class="clean-bank-line"><span class="lbl">Account No:</span> <strong>${escapeHtml(accNo)}</strong></div>
+                            <div class="clean-bank-line"><span class="lbl">IFSC Code:</span> <strong>${escapeHtml(ifsc)}</strong></div>
+                        </div>
+
+                        <!-- Authorized Signatory (Centered with respect to itself) -->
+                        <div class="clean-sign-pane">
+                            <div class="clean-for-issuer">For <strong>${escapeHtml(issuerName)}</strong></div>
+                            <div class="clean-sign-space"></div>
+                            <div class="clean-sign-line">Authorized Signatory</div>
+                        </div>
                     </div>
-                    
-                    <div class="signature-box">
-                        <span style="font-size: 13px;">For <strong>${escapeHtml(issuerName)}</strong></span><br>
-                        <span class="signature-line">Authorized Signatory</span>
+
+                    <!-- NEXT LINE: Terms & Conditions across the full width of the page (each on new line) -->
+                    <div class="clean-terms-divider"></div>
+                    <div class="clean-terms-block">
+                        <div class="clean-terms-heading">Terms &amp; Conditions:</div>
+                        <div class="clean-term-line">1. E.&amp; O.E.</div>
+                        <div class="clean-term-line">2. Subject to '<strong>${escapeHtml(termsJurisdiction)}</strong>' Jurisdiction only.</div>
+                        <div class="clean-term-line">3. Payment Due: <strong>${escapeHtml(termsPaymentDue)}</strong></div>
                     </div>
                 </div>
             </div>
@@ -1726,7 +2131,6 @@
     }
 
     // --- PRINT FUNCTIONS ---
-    // Print All Invoices
     function printAllInvoices() {
         if (invoiceList.length === 0) {
             showToast('Please add at least one invoice to print.');
@@ -1735,7 +2139,6 @@
         executePrint(invoiceList);
     }
 
-    // Print Selected Invoices (checkbox checked)
     function printSelectedInvoices() {
         const selected = invoiceList.filter(i => i.selected);
         if (selected.length === 0) {
@@ -1745,14 +2148,12 @@
         executePrint(selected);
     }
 
-    // Print Single Invoice
     function printSingleInvoice(id) {
         const item = invoiceList.find(i => i.id === id);
         if (!item) return;
         executePrint([item]);
     }
 
-    // Core print execution helper
     function executePrint(invoicesToPrint) {
         const printArea = document.getElementById('printArea');
         if (!printArea) return;
@@ -1764,19 +2165,19 @@
 
         printArea.innerHTML = fullHTML;
 
-        // Allow microtask tick for DOM rendering then trigger print
         setTimeout(() => {
             window.print();
         }, 100);
     }
 
     // --- LOCAL STORAGE PERSISTENCE ---
-    const STORAGE_KEY = 'redcoupons_multi_invoice_state_v3';
+    const STORAGE_KEY = 'redcoupons_multi_invoice_state_v6';
 
     function saveState() {
         const state = {
             issuerName: document.getElementById('issuerName').value,
             issuerPan: document.getElementById('issuerPan').value,
+            issuerAadhar: document.getElementById('issuerAadhar') ? document.getElementById('issuerAadhar').value : '',
             issuerPhone: document.getElementById('issuerPhone').value,
             issuerEmail: document.getElementById('issuerEmail').value,
             issuerAddress: document.getElementById('issuerAddress').value,
@@ -1786,8 +2187,12 @@
             clientName: document.getElementById('clientName').value,
             clientAddress: document.getElementById('clientAddress').value,
             clientCin: document.getElementById('clientCin').value,
+            termsJurisdiction: document.getElementById('termsJurisdiction') ? document.getElementById('termsJurisdiction').value : 'Rajasthan',
+            termsPaymentDue: document.getElementById('termsPaymentDue') ? document.getElementById('termsPaymentDue').value : 'Immediate',
+            invoiceDocTitle: document.getElementById('invoiceDocTitle') ? document.getElementById('invoiceDocTitle').value : 'INVOICE',
             activityName: document.getElementById('activityName').value,
             activityDesc: document.getElementById('activityDesc').value,
+            headerLayout: document.getElementById('headerLayoutSelect').value,
             dateFormat: document.getElementById('dateFormatSelect').value,
             initialFallback: document.getElementById('initialDateFallback').value,
             globalTemplate: document.getElementById('globalTemplateInput').value,
@@ -1807,6 +2212,7 @@
             const state = JSON.parse(raw);
             if (state.issuerName !== undefined) document.getElementById('issuerName').value = state.issuerName;
             if (state.issuerPan !== undefined) document.getElementById('issuerPan').value = state.issuerPan;
+            if (state.issuerAadhar !== undefined && document.getElementById('issuerAadhar')) document.getElementById('issuerAadhar').value = state.issuerAadhar;
             if (state.issuerPhone !== undefined) document.getElementById('issuerPhone').value = state.issuerPhone;
             if (state.issuerEmail !== undefined) document.getElementById('issuerEmail').value = state.issuerEmail;
             if (state.issuerAddress !== undefined) document.getElementById('issuerAddress').value = state.issuerAddress;
@@ -1816,8 +2222,12 @@
             if (state.clientName !== undefined) document.getElementById('clientName').value = state.clientName;
             if (state.clientAddress !== undefined) document.getElementById('clientAddress').value = state.clientAddress;
             if (state.clientCin !== undefined) document.getElementById('clientCin').value = state.clientCin;
+            if (state.termsJurisdiction !== undefined && document.getElementById('termsJurisdiction')) document.getElementById('termsJurisdiction').value = state.termsJurisdiction;
+            if (state.termsPaymentDue !== undefined && document.getElementById('termsPaymentDue')) document.getElementById('termsPaymentDue').value = state.termsPaymentDue;
+            if (state.invoiceDocTitle !== undefined && document.getElementById('invoiceDocTitle')) document.getElementById('invoiceDocTitle').value = state.invoiceDocTitle;
             if (state.activityName !== undefined) document.getElementById('activityName').value = state.activityName;
             if (state.activityDesc !== undefined) document.getElementById('activityDesc').value = state.activityDesc;
+            if (state.headerLayout !== undefined) document.getElementById('headerLayoutSelect').value = state.headerLayout;
             if (state.dateFormat !== undefined) document.getElementById('dateFormatSelect').value = state.dateFormat;
             if (state.initialFallback !== undefined) document.getElementById('initialDateFallback').value = state.initialFallback;
             if (state.globalTemplate !== undefined) document.getElementById('globalTemplateInput').value = state.globalTemplate;
@@ -1831,18 +2241,41 @@
     }
 
     function saveAndRefresh() {
+        // Sync Terms preview badge in config card
+        const jurisElem = document.getElementById('termsJurisdiction');
+        const dueElem = document.getElementById('termsPaymentDue');
+        if (jurisElem && document.getElementById('previewJurisdiction')) {
+            document.getElementById('previewJurisdiction').textContent = jurisElem.value || 'Rajasthan';
+        }
+        if (dueElem && document.getElementById('previewPaymentDue')) {
+            document.getElementById('previewPaymentDue').textContent = dueElem.value || 'Immediate';
+        }
+
         saveState();
+        updateIssuerNameBadge();
         renderTable();
         renderScreenPreview();
     }
 
-    // --- SAMPLE DATA PRESETS (WITH ASS/2026-27/001 FORMAT) ---
-    function loadSampleData() {
-        document.getElementById('issuerName').value = 'Ramesh Sharma';
-        document.getElementById('issuerPan').value = 'ABCPS1234F';
-        document.getElementById('issuerPhone').value = '+91 98290 12345';
-        document.getElementById('issuerEmail').value = 'ramesh.sharma@example.com';
-        document.getElementById('issuerAddress').value = 'Flat No. 402, Shanti Heights, Station Road,\nJaipur, Rajasthan, 302001';
+    // --- SAMPLE DATA PRESETS (BASED ON 1st 2 OF FIRST NAME + 1st OF LAST NAME) ---
+    function loadSampleData(sampleType = 'KAJ') {
+        const isArihant = sampleType === 'ARJ';
+
+        if (isArihant) {
+            document.getElementById('issuerName').value = 'Arihantkumar Meghrajbhai Jain';
+            document.getElementById('issuerPan').value = ''; // Demonstrates PAN empty, Aadhar shown
+            document.getElementById('issuerAadhar').value = '4321 8765 2109';
+            document.getElementById('issuerPhone').value = '+91 98291 54321';
+            document.getElementById('issuerEmail').value = 'arihant.jain@example.com';
+            document.getElementById('issuerAddress').value = 'House No. 84, Mahaveer Colony, Nokha, Bikaner, Rajasthan, 334803';
+        } else {
+            document.getElementById('issuerName').value = 'Kanaiyalal Jain';
+            document.getElementById('issuerPan').value = 'KAJPJ1234F'; // Has PAN
+            document.getElementById('issuerAadhar').value = '';
+            document.getElementById('issuerPhone').value = '+91 98290 12345';
+            document.getElementById('issuerEmail').value = 'kanaiyalal.jain@example.com';
+            document.getElementById('issuerAddress').value = 'Ward No. 12, Main Market, Nokha, Bikaner, Rajasthan, 334803';
+        }
 
         document.getElementById('bankName').value = 'State Bank of India';
         document.getElementById('accNo').value = '38920194821';
@@ -1852,18 +2285,25 @@
         document.getElementById('clientAddress').value = 'Ward No. 29, Pani Tanki Ke Pass, Nokha,\nBikaner, Nokha, Rajasthan, India, 334803';
         document.getElementById('clientCin').value = 'CIN: U73100RJ2024PTC098563';
 
+        document.getElementById('termsJurisdiction').value = 'Rajasthan';
+        document.getElementById('termsPaymentDue').value = 'Immediate';
+
         document.getElementById('activityName').value = 'Back Office Data Entry & Administrative Support';
         document.getElementById('activityDesc').value = 'Routine data entry, data sorting, form input, record updating, information categorisation and other back-office administrative support activities.';
 
+        document.getElementById('headerLayoutSelect').value = 'clean';
         document.getElementById('dateFormatSelect').value = 'DD/MM/YYYY';
         document.getElementById('initialDateFallback').value = '2026-08-01';
         document.getElementById('globalTemplateInput').value = 'Services rendered from {{Last_billing_date}} to {{billing_date}}';
+        if (document.getElementById('invoiceDocTitle')) document.getElementById('invoiceDocTitle').value = 'INVOICE';
+
+        const prefix = isArihant ? 'ARJ/2026-27/' : 'KAJ/2026-27/';
 
         invoiceList = [
             {
                 id: 'inv_sample_1',
                 selected: true,
-                invoiceNo: 'ASS/2026-27/001',
+                invoiceNo: `${prefix}001`,
                 date: '2026-08-31',
                 amount: 18500,
                 optionalLine: 'Services rendered from {{Last_billing_date}} to {{billing_date}}'
@@ -1871,7 +2311,7 @@
             {
                 id: 'inv_sample_2',
                 selected: true,
-                invoiceNo: 'ASS/2026-27/002',
+                invoiceNo: `${prefix}002`,
                 date: '2026-09-30',
                 amount: 18500,
                 optionalLine: 'Services rendered from {{Last_billing_date}} to {{before_billing}}'
@@ -1879,7 +2319,7 @@
             {
                 id: 'inv_sample_3',
                 selected: true,
-                invoiceNo: 'ASS/2026-27/003',
+                invoiceNo: `${prefix}003`,
                 date: '2026-10-31',
                 amount: 21000,
                 optionalLine: 'Billing cycle: {{Last_billing_date}} to {{billing_date}} (Includes extra administrative support)'
@@ -1887,7 +2327,7 @@
         ];
 
         saveAndRefresh();
-        showToast('Sample data loaded with ASS/2026-27 format');
+        showToast(`Loaded ${isArihant ? 'A. Jain (Aadhaar)' : 'K. Jain (PAN)'} sample`);
     }
 
     function resetAllData() {
@@ -1895,6 +2335,7 @@
         localStorage.removeItem(STORAGE_KEY);
         document.getElementById('issuerName').value = '';
         document.getElementById('issuerPan').value = '';
+        if (document.getElementById('issuerAadhar')) document.getElementById('issuerAadhar').value = '';
         document.getElementById('issuerPhone').value = '';
         document.getElementById('issuerEmail').value = '';
         document.getElementById('issuerAddress').value = '';
@@ -1903,6 +2344,7 @@
         document.getElementById('ifsc').value = '';
         document.getElementById('initialDateFallback').value = '';
         document.getElementById('globalTemplateInput').value = '';
+        if (document.getElementById('invoiceDocTitle')) document.getElementById('invoiceDocTitle').value = 'INVOICE';
         invoiceList = [];
         saveAndRefresh();
         showToast('All data cleared');
