@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RBI Reference Rate & RCM GST Calculator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans">
+
+    <!-- Header -->
+    <header class="bg-blue-900 text-white shadow-md py-6 px-4 mb-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-2xl md:text-3xl font-bold flex items-center gap-2">
+                🏛️ RBI Exchange Rate & RCM Calculator
+            </h1>
+            <p class="text-blue-200 text-sm mt-1">Automatic previous date fallback for non-working days with 18% RCM GST calculation.</p>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto w-full px-4 mb-12 flex-grow">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Input Section -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Input Parameters</h2>
+                    
+                    <!-- Date Input -->
+                    <div class="mb-5">
+                        <label for="dateInput" class="block text-sm font-medium text-slate-700 mb-1">Select or Paste Date:</label>
+                        <div class="flex gap-2">
+                            <input type="date" id="dateInput" class="flex-grow px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-700">
+                            <input type="text" id="textDateInput" placeholder="DD/MM/YYYY" class="w-32 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-700 text-center">
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Supports calendar pick, manual typing, or copy-pasting.</p>
+                    </div>
+
+                    <!-- Amount Input -->
+                    <div class="mb-4">
+                        <label for="amountInput" class="block text-sm font-medium text-slate-700 mb-1">Foreign Currency Amount (USD):</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-semibold">$</span>
+                            <input type="number" id="amountInput" value="1000" step="any" min="0" placeholder="Enter amount" class="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-700 font-medium">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Presets -->
+                <div class="mt-6 pt-4 border-t border-slate-100">
+                    <span class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Quick Shortcuts</span>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="setLatestDate()" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-md text-xs font-medium transition">Latest Available Date</button>
+                        <button onclick="setTodayDate()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-xs font-medium transition">Today's Date</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output / Results Section -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Calculation Results</h2>
+
+                    <!-- Match Status -->
+                    <div id="statusAlert" class="mb-4 p-3 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        Exact rate found for date.
+                    </div>
+
+                    <!-- Rate & Date Details -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg">
+                            <span class="text-sm text-slate-600">Matched RBI Date:</span>
+                            <span id="matchedDateDisplay" class="font-bold text-slate-900">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg">
+                            <span class="text-sm text-slate-600">RBI Rate (1 USD):</span>
+                            <span id="rateDisplay" class="font-bold text-blue-600">₹ -</span>
+                        </div>
+                    </div>
+
+                    <!-- Financial Breakdown -->
+                    <div class="space-y-2 text-sm border-t border-slate-100 pt-4">
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Converted Amount (INR):</span>
+                            <span id="convertedINR" class="font-semibold text-slate-900">₹ 0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">18% GST on RCM:</span>
+                            <span id="rcmGST" class="font-semibold text-amber-600">₹ 0.00</span>
+                        </div>
+                        <div class="flex justify-between border-t border-dashed border-slate-200 pt-2 mt-2 text-base">
+                            <span class="font-bold text-slate-800">Total Payable (INR + GST):</span>
+                            <span id="totalPayable" class="font-extrabold text-blue-900">₹ 0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-100 text-right">
+                    <button onclick="calculate()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition">
+                        Recalculate
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+        RBI Reference Rate Calculator &bull; Built with embedded historical rates dataset.
+    </footer>
+
+    <!-- Embedded Dataset & Logic -->
+    <script>
+        // Embedded RBI Rate Dataset from file
+        const rbiData = [
+            { dateStr: "07/04/2026", rate: 92.9625 },
+            { dateStr: "06/04/2026", rate: 93.0591 },
+            { dateStr: "02/04/2026", rate: 93.2088 },
+            { dateStr: "30/03/2026", rate: 94.6543 },
+            { dateStr: "27/03/2026", rate: 94.5988 },
+            { dateStr: "25/03/2026", rate: 93.9657 },
+            { dateStr: "24/03/2026", rate: 93.8792 },
+            { dateStr: "23/03/2026", rate: 93.8980 },
+            { dateStr: "20/03/2026", rate: 93.3483 },
+            { dateStr: "18/03/2026", rate: 92.4514 },
+            { dateStr: "17/03/2026", rate: 92.4570 },
+            { dateStr: "16/03/2026", rate: 92.3966 },
+            { dateStr: "13/03/2026", rate: 92.4405 },
+            { dateStr: "12/03/2026", rate: 92.3530 },
+            { dateStr: "11/03/2026", rate: 92.4116 },
+            { dateStr: "10/03/2026", rate: 92.2965 },
+            { dateStr: "09/03/2026", rate: 92.3168 },
+            { dateStr: "06/03/2026", rate: 92.2646 },
+            { dateStr: "05/03/2026", rate: 92.2859 },
+            { dateStr: "04/03/2026", rate: 92.1793 },
+            { dateStr: "03/03/2026", rate: 92.2343 },
+            { dateStr: "02/03/2026", rate: 92.0591 },
+            { dateStr: "27/02/2026", rate: 91.9961 },
+            { dateStr: "26/02/2026", rate: 92.0911 },
+            { dateStr: "25/02/2026", rate: 92.0991 },
+            { dateStr: "24/02/2026", rate: 92.1120 },
+            { dateStr: "23/02/2026", rate: 92.0725 },
+            { dateStr: "20/02/2026", rate: 92.1384 },
+            { dateStr: "19/02/2026", rate: 92.1648 },
+            { dateStr: "18/02/2026", rate: 92.0934 },
+            { dateStr: "17/02/2026", rate: 92.0942 },
+            { dateStr: "16/02/2026", rate: 92.1197 },
+            { dateStr: "13/02/2026", rate: 92.0927 },
+            { dateStr: "12/02/2026", rate: 92.1378 },
+            { dateStr: "11/02/2026", rate: 92.2341 },
+            { dateStr: "10/02/2026", rate: 92.1287 },
+            { dateStr: "09/02/2026", rate: 92.1187 },
+            { dateStr: "06/02/2026", rate: 91.9360 },
+            { dateStr: "05/02/2026", rate: 91.9365 },
+            { dateStr: "04/02/2026", rate: 91.8687 },
+            { dateStr: "03/02/2026", rate: 91.7589 },
+            { dateStr: "02/02/2026", rate: 91.6881 },
+            { dateStr: "30/01/2026", rate: 91.6166 },
+            { dateStr: "29/01/2026", rate: 91.5647 },
+            { dateStr: "28/01/2026", rate: 91.5667 },
+            { dateStr: "27/01/2026", rate: 91.5658 },
+            { dateStr: "23/01/2026", rate: 91.7225 },
+            { dateStr: "22/01/2026", rate: 91.8159 },
+            { dateStr: "21/01/2026", rate: 91.8797 },
+            { dateStr: "20/01/2026", rate: 91.9142 },
+            { dateStr: "19/01/2026", rate: 91.9056 },
+            { dateStr: "16/01/2026", rate: 91.8988 },
+            { dateStr: "15/01/2026", rate: 91.7773 },
+            { dateStr: "14/01/2026", rate: 91.8037 },
+            { dateStr: "13/01/2026", rate: 91.7610 },
+            { dateStr: "12/01/2026", rate: 91.7570 },
+            { dateStr: "09/01/2026", rate: 91.6384 },
+            { dateStr: "08/01/2026", rate: 91.7370 },
+            { dateStr: "07/01/2026", rate: 91.8601 },
+            { dateStr: "06/01/2026", rate: 91.9168 },
+            { dateStr: "05/01/2026", rate: 92.0076 },
+            { dateStr: "02/01/2026", rate: 92.0734 },
+            { dateStr: "31/12/2025", rate: 92.1764 },
+            { dateStr: "30/12/2025", rate: 92.2046 },
+            { dateStr: "29/12/2025", rate: 92.1783 },
+            { dateStr: "26/12/2025", rate: 92.0543 },
+            { dateStr: "24/12/2025", rate: 91.9566 },
+            { dateStr: "23/12/2025", rate: 91.8217 },
+            { dateStr: "22/12/2025", rate: 91.6575 },
+            { dateStr: "19/12/2025", rate: 91.6881 },
+            { dateStr: "18/12/2025", rate: 91.6961 },
+            { dateStr: "17/12/2025", rate: 91.6033 },
+            { dateStr: "16/12/2025", rate: 91.5606 },
+            { dateStr: "15/12/2025", rate: 91.5790 },
+            { dateStr: "12/12/2025", rate: 91.5772 },
+            { dateStr: "11/12/2025", rate: 91.5348 },
+            { dateStr: "10/12/2025", rate: 91.4398 },
+            { dateStr: "09/12/2025", rate: 91.3916 },
+            { dateStr: "08/12/2025", rate: 91.3734 },
+            { dateStr: "05/12/2025", rate: 91.2403 },
+            { dateStr: "04/12/2025", rate: 91.1718 },
+            { dateStr: "03/12/2025", rate: 91.0772 },
+            { dateStr: "02/12/2025", rate: 91.0028 },
+            { dateStr: "01/12/2025", rate: 90.9575 },
+            { dateStr: "28/11/2025", rate: 90.7961 },
+            { dateStr: "27/11/2025", rate: 90.7850 },
+            { dateStr: "26/11/2025", rate: 90.7161 },
+            { dateStr: "25/11/2025", rate: 90.7788 },
+            { dateStr: "24/11/2025", rate: 90.7248 },
+            { dateStr: "21/11/2025", rate: 90.8718 },
+            { dateStr: "20/11/2025", rate: 90.8227 },
+            { dateStr: "19/11/2025", rate: 90.7891 },
+            { dateStr: "18/11/2025", rate: 90.8062 },
+            { dateStr: "17/11/2025", rate: 90.8227 },
+            { dateStr: "14/11/2025", rate: 90.8407 },
+            { dateStr: "13/11/2025", rate: 90.8123 },
+            { dateStr: "12/11/2025", rate: 90.8385 },
+            { dateStr: "11/11/2025", rate: 90.8656 },
+            { dateStr: "07/11/2025", rate: 90.8358 },
+            { dateStr: "06/11/2025", rate: 90.9634 },
+            { dateStr: "05/11/2025", rate: 90.9859 },
+            { dateStr: "04/11/2025", rate: 90.9602 },
+            { dateStr: "03/11/2025", rate: 90.9388 },
+            { dateStr: "31/10/2025", rate: 90.9782 },
+            { dateStr: "30/10/2025", rate: 90.9705 },
+            { dateStr: "29/10/2025", rate: 90.9392 },
+            { dateStr: "28/10/2025", rate: 90.8872 },
+            { dateStr: "27/10/2025", rate: 90.8272 },
+            { dateStr: "24/10/2025", rate: 90.7262 },
+            { dateStr: "23/10/2025", rate: 90.6946 },
+            { dateStr: "22/10/2025", rate: 90.6864 },
+            { dateStr: "21/10/2025", rate: 90.7291 },
+            { dateStr: "20/10/2025", rate: 90.7712 },
+            { dateStr: "17/10/2025", rate: 90.7618 },
+            { dateStr: "16/10/2025", rate: 90.6974 },
+            { dateStr: "15/10/2025", rate: 90.6358 },
+            { dateStr: "14/10/2025", rate: 90.6384 },
+            { dateStr: "13/10/2025", rate: 90.6393 },
+            { dateStr: "10/10/2025", rate: 90.6558 },
+            { dateStr: "09/10/2025", rate: 90.7420 },
+            { dateStr: "08/10/2025", rate: 90.7937 },
+            { dateStr: "07/10/2025", rate: 90.7247 },
+            { dateStr: "06/10/2025", rate: 90.5835 },
+            { dateStr: "03/10/2025", rate: 90.4137 },
+            { dateStr: "01/10/2025", rate: 90.2241 },
+            { dateStr: "30/09/2025", rate: 90.1064 },
+            { dateStr: "26/09/2025", rate: 90.0910 },
+            { dateStr: "25/09/2025", rate: 90.1090 },
+            { dateStr: "24/09/2025", rate: 90.1179 },
+            { dateStr: "23/09/2025", rate: 90.0886 },
+            { dateStr: "22/09/2025", rate: 90.0881 },
+            { dateStr: "19/09/2025", rate: 90.0881 },
+            { dateStr: "18/09/2025", rate: 90.0768 },
+            { dateStr: "17/09/2025", rate: 90.0090 },
+            { dateStr: "16/09/2025", rate: 90.0520 },
+            { dateStr: "15/09/2025", rate: 90.1340 },
+            { dateStr: "12/09/2025", rate: 90.2263 },
+            { dateStr: "11/09/2025", rate: 90.2335 },
+            { dateStr: "10/09/2025", rate: 90.1884 },
+            { dateStr: "09/09/2025", rate: 90.0761 },
+            { dateStr: "08/09/2025", rate: 89.9620 },
+            { dateStr: "05/09/2025", rate: 89.9077 },
+            { dateStr: "04/09/2025", rate: 89.9234 },
+            { dateStr: "03/09/2025", rate: 89.8783 },
+            { dateStr: "02/09/2025", rate: 89.8805 },
+            { dateStr: "01/09/2025", rate: 89.9221 },
+            { dateStr: "29/08/2025", rate: 89.9754 },
+            { dateStr: "28/08/2025", rate: 90.0163 },
+            { dateStr: "27/08/2025", rate: 90.0305 },
+            { dateStr: "26/08/2025", rate: 90.0632 },
+            { dateStr: "25/08/2025", rate: 90.0877 },
+            { dateStr: "22/08/2025", rate: 90.0805 },
+            { dateStr: "21/08/2025", rate: 90.1068 },
+            { dateStr: "20/08/2025", rate: 90.1309 },
+            { dateStr: "19/08/2025", rate: 90.1580 },
+            { dateStr: "18/08/2025", rate: 90.1472 },
+            { dateStr: "14/08/2025", rate: 90.1714 },
+            { dateStr: "13/08/2025", rate: 90.1561 },
+            { dateStr: "12/08/2025", rate: 90.1601 },
+            { dateStr: "11/08/2025", rate: 90.1343 },
+            { dateStr: "08/08/2025", rate: 90.1257 },
+            { dateStr: "07/08/2025", rate: 90.1325 },
+            { dateStr: "06/08/2025", rate: 90.1420 },
+            { dateStr: "05/08/2025", rate: 90.1171 },
+            { dateStr: "04/08/2025", rate: 90.1220 },
+            { dateStr: "01/08/2025", rate: 90.1189 },
+            { dateStr: "31/07/2025", rate: 90.1017 },
+            { dateStr: "30/07/2025", rate: 90.0768 },
+            { dateStr: "29/07/2025", rate: 90.0460 },
+            { dateStr: "28/07/2025", rate: 90.0384 },
+            { dateStr: "25/07/2025", rate: 89.9880 },
+            { dateStr: "24/07/2025", rate: 89.9702 },
+            { dateStr: "23/07/2025", rate: 89.9678 },
+            { dateStr: "22/07/2025", rate: 89.9763 },
+            { dateStr: "21/07/2025", rate: 89.9647 },
+            { dateStr: "18/07/2025", rate: 89.9543 },
+            { dateStr: "17/07/2025", rate: 89.9673 },
+            { dateStr: "16/07/2025", rate: 89.9577 },
+            { dateStr: "15/07/2025", rate: 89.9620 },
+            { dateStr: "14/07/2025", rate: 89.9328 },
+            { dateStr: "11/07/2025", rate: 89.8710 },
+            { dateStr: "10/07/2025", rate: 89.8496 },
+            { dateStr: "09/07/2025", rate: 89.8351 },
+            { dateStr: "08/07/2025", rate: 89.8130 },
+            { dateStr: "07/07/2025", rate: 89.8115 },
+            { dateStr: "04/07/2025", rate: 89.7915 },
+            { dateStr: "03/07/2025", rate: 89.7610 },
+            { dateStr: "02/07/2025", rate: 89.7348 },
+            { dateStr: "01/07/2025", rate: 89.7214 },
+            { dateStr: "30/06/2025", rate: 89.7247 },
+            { dateStr: "27/06/2025", rate: 89.6588 },
+            { dateStr: "26/06/2025", rate: 89.6534 },
+            { dateStr: "25/06/2025", rate: 89.6171 },
+            { dateStr: "24/06/2025", rate: 89.6201 },
+            { dateStr: "23/06/2025", rate: 89.6083 },
+            { dateStr: "20/06/2025", rate: 89.5898 },
+            { dateStr: "19/06/2025", rate: 89.5937 },
+            { dateStr: "18/06/2025", rate: 89.5694 },
+            { dateStr: "17/06/2025", rate: 89.5828 },
+            { dateStr: "16/06/2025", rate: 89.5962 },
+            { dateStr: "13/06/2025", rate: 89.5445 },
+            { dateStr: "12/06/2025", rate: 89.5398 },
+            { dateStr: "11/06/2025", rate: 89.5081 },
+            { dateStr: "10/06/2025", rate: 89.4795 },
+            { dateStr: "09/06/2025", rate: 89.4395 },
+            { dateStr: "06/06/2025", rate: 89.3768 },
+            { dateStr: "05/06/2025", rate: 89.3510 },
+            { dateStr: "04/06/2025", rate: 89.3375 },
+            { dateStr: "03/06/2025", rate: 89.3308 },
+            { dateStr: "02/06/2025", rate: 89.3204 },
+            { dateStr: "30/05/2025", rate: 89.2801 },
+            { dateStr: "29/05/2025", rate: 89.2570 },
+            { dateStr: "28/05/2025", rate: 89.2270 },
+            { dateStr: "27/05/2025", rate: 89.1764 },
+            { dateStr: "26/05/2025", rate: 89.1081 },
+            { dateStr: "23/05/2025", rate: 89.0494 },
+            { dateStr: "22/05/2025", rate: 89.0204 },
+            { dateStr: "21/05/2025", rate: 89.0180 },
+            { dateStr: "20/05/2025", rate: 89.0117 },
+            { dateStr: "19/05/2025", rate: 88.9950 },
+            { dateStr: "16/05/2025", rate: 88.9743 },
+            { dateStr: "15/05/2025", rate: 88.9667 },
+            { dateStr: "14/05/2025", rate: 88.9566 },
+            { dateStr: "13/05/2025", rate: 88.9658 },
+            { dateStr: "12/05/2025", rate: 88.9547 },
+            { dateStr: "09/05/2025", rate: 88.9220 },
+            { dateStr: "08/05/2025", rate: 88.8937 },
+            { dateStr: "07/05/2025", rate: 88.8870 },
+            { dateStr: "06/05/2025", rate: 88.8680 },
+            { dateStr: "05/05/2025", rate: 88.8475 },
+            { dateStr: "02/05/2025", rate: 88.8358 },
+            { dateStr: "30/04/2025", rate: 88.7997 },
+            { dateStr: "29/04/2025", rate: 88.7510 },
+            { dateStr: "28/04/2025", rate: 88.6948 },
+            { dateStr: "25/04/2025", rate: 88.6277 },
+            { dateStr: "24/04/2025", rate: 88.5835 },
+            { dateStr: "23/04/2025", rate: 88.5472 },
+            { dateStr: "22/04/2025", rate: 88.4891 },
+            { dateStr: "21/04/2025", rate: 88.4410 },
+            { dateStr: "18/04/2025", rate: 88.3843 },
+            { dateStr: "17/04/2025", rate: 88.3510 },
+            { dateStr: "16/04/2025", rate: 88.3121 },
+            { dateStr: "15/04/2025", rate: 88.2618 },
+            { dateStr: "11/04/2025", rate: 87.2184 },
+            { dateStr: "10/04/2025", rate: 86.8184 },
+            { dateStr: "09/04/2025", rate: 86.6171 },
+            { dateStr: "08/04/2025", rate: 85.9085 },
+            { dateStr: "07/04/2025", rate: 85.8087 },
+            { dateStr: "04/04/2025", rate: 85.2281 },
+            { dateStr: "03/04/2025", rate: 85.6468 },
+            { dateStr: "02/04/2025", rate: 85.6024 },
+            { dateStr: "28/03/2025", rate: 85.5814 },
+            { dateStr: "27/03/2025", rate: 85.7610 },
+            { dateStr: "26/03/2025", rate: 85.8683 },
+            { dateStr: "25/03/2025", rate: 85.7302 },
+            { dateStr: "24/03/2025", rate: 85.8318 },
+            { dateStr: "21/03/2025", rate: 86.2184 },
+            { dateStr: "20/03/2025", rate: 86.3040 },
+            { dateStr: "19/03/2025", rate: 19.5016 },
+            { dateStr: "18/03/2025", rate: 86.6705 }
+        ];
+
+        // Parse dataset into Map { 'YYYY-MM-DD': { dateStr, rate, dateObj } }
+        const rateMap = new Map();
+        rbiData.forEach(item => {
+            const parts = item.dateStr.split('/');
+            if(parts.length === 3) {
+                const isoStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                rateMap.set(isoStr, {
+                    dateStr: item.dateStr,
+                    rate: item.rate,
+                    dateObj: new Date(parts[2], parts[1] - 1, parts[0])
+                });
+            }
+        });
+
+        // Sort records chronologically for fallback search
+        const sortedRates = Array.from(rateMap.values()).sort((a, b) => a.dateObj - b.dateObj);
+
+        // DOM elements
+        const dateInput = document.getElementById('dateInput');
+        const textDateInput = document.getElementById('textDateInput');
+        const amountInput = document.getElementById('amountInput');
+        const matchedDateDisplay = document.getElementById('matchedDateDisplay');
+        const rateDisplay = document.getElementById('rateDisplay');
+        const convertedINR = document.getElementById('convertedINR');
+        const rcmGST = document.getElementById('rcmGST');
+        const totalPayable = document.getElementById('totalPayable');
+        const statusAlert = document.getElementById('statusAlert');
+
+        // Initialize with latest date
+        function setLatestDate() {
+            if(sortedRates.length > 0) {
+                const latest = sortedRates[sortedRates.length - 1];
+                setDateToInputs(latest.dateObj);
+            }
+        }
+
+        function setTodayDate() {
+            setDateToInputs(new Date());
+        }
+
+        function setDateToInputs(dateObj) {
+            const yyyy = dateObj.getFullYear();
+            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObj.getDate()).padStart(2, '0');
+            
+            dateInput.value = `${yyyy}-${mm}-${dd}`;
+            textDateInput.value = `${dd}/${mm}/${yyyy}`;
+            calculate();
+        }
+
+        // Find rate for date or fallback to previous available date
+        function findRate(targetDate) {
+            // Check exact match
+            const yyyy = targetDate.getFullYear();
+            const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(targetDate.getDate()).padStart(2, '0');
+            const iso = `${yyyy}-${mm}-${dd}`;
+
+            if(rateMap.has(iso)) {
+                return { record: rateMap.get(iso), exact: true };
+            }
+
+            // Fallback to previous closest date
+            let closest = null;
+            for(let i = sortedRates.length - 1; i >= 0; i--) {
+                if(sortedRates[i].dateObj <= targetDate) {
+                    closest = sortedRates[i];
+                    break;
+                }
+            }
+
+            // If target date is earlier than all records, take the earliest available
+            if(!closest && sortedRates.length > 0) {
+                closest = sortedRates[0];
+            }
+
+            return { record: closest, exact: false, searchedIso: iso };
+        }
+
+        function calculate() {
+            let targetDate = new Date(dateInput.value);
+            
+            if(isNaN(targetDate.getTime())) {
+                // Try parsing text input (DD/MM/YYYY)
+                const parts = textDateInput.value.split('/');
+                if(parts.length === 3) {
+                    targetDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                }
+            }
+
+            if(isNaN(targetDate.getTime())) {
+                statusAlert.className = "mb-4 p-3 rounded-lg text-xs font-medium bg-rose-50 text-rose-800 border border-rose-200";
+                statusAlert.textContent = "Please enter a valid date.";
+                return;
+            }
+
+            const result = findRate(targetDate);
+            const amount = parseFloat(amountInput.value) || 0;
+
+            if(!result.record) {
+                statusAlert.className = "mb-4 p-3 rounded-lg text-xs font-medium bg-rose-50 text-rose-800 border border-rose-200";
+                statusAlert.textContent = "No rate records found.";
+                return;
+            }
+
+            const rate = result.record.rate;
+            const inrValue = amount * rate;
+            const gstAmount = inrValue * 0.18;
+            const total = inrValue + gstAmount;
+
+            // Update UI
+            matchedDateDisplay.textContent = result.record.dateStr;
+            rateDisplay.textContent = `₹ ${rate.toFixed(4)}`;
+            convertedINR.textContent = `₹ ${inrValue.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            rcmGST.textContent = `₹ ${gstAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            totalPayable.textContent = `₹ ${total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+            if(result.exact) {
+                statusAlert.className = "mb-4 p-3 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200";
+                statusAlert.textContent = `✓ Exact RBI rate found for ${result.record.dateStr}.`;
+            } else {
+                statusAlert.className = "mb-4 p-3 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200";
+                statusAlert.textContent = `⚠ Date not available in RBI records. Picked previous available date: ${result.record.dateStr}`;
+            }
+        }
+
+        // Sync inputs
+        dateInput.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if(val) {
+                const parts = val.split('-');
+                textDateInput.value = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                calculate();
+            }
+        });
+
+        textDateInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            const parts = val.split('/');
+            if(parts.length === 3 && parts[2].length === 4) {
+                const d = new Date(parts[2], parts[1] - 1, parts[0]);
+                if(!isNaN(d.getTime())) {
+                    dateInput.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    calculate();
+                }
+            }
+        });
+
+        amountInput.addEventListener('input', calculate);
+
+        // Initial load on page startup
+        window.addEventListener('DOMContentLoaded', () => {
+            setLatestDate();
+        });
+    </script>
+</body>
+</html>
